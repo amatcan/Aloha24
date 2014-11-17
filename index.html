@@ -1,0 +1,146 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/splash/splash-icon.png">
+		<link rel="apple-touch-startup-image" href="images/splash/splash-screen.png" 			media="screen and (max-device-width: 320px)" />  
+		<link rel="apple-touch-startup-image" href="images/splash/splash-screen@2x.png" 		media="(max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 2)" /> 
+		<link rel="apple-touch-startup-image" sizes="640x1096" href="images/splash/splash-screen@3x.png" />
+		<link rel="apple-touch-startup-image" sizes="1024x748" href="images/splash/splash-screen-ipad-landscape" media="screen and (min-device-width : 481px) and (max-device-width : 1024px) and (orientation : landscape)" />
+		<link rel="apple-touch-startup-image" sizes="768x1004" href="images/splash/splash-screen-ipad-portrait.png" media="screen and (min-device-width : 481px) and (max-device-width : 1024px) and (orientation : portrait)" />
+		<link rel="apple-touch-startup-image" sizes="1536x2008" href="images/splash/splash-screen-ipad-portrait-retina.png"   media="(device-width: 768px)	and (orientation: portrait)	and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" sizes="1496x2048" href="images/splash/splash-screen-ipad-landscape-retina.png"   media="(device-width: 768px)	and (orientation: landscape)	and (-webkit-device-pixel-ratio: 2)"/>
+
+		<title>Aloha24</title>
+
+		<link href="styles/style.css"     		 rel="stylesheet" type="text/css">
+		<link href="styles/framework.css" 		 rel="stylesheet" type="text/css">
+		<link href="styles/menu.css" 		 	 rel="stylesheet" type="text/css">
+		<link href="styles/owl.theme.css" 		 rel="stylesheet" type="text/css">
+		<link href="styles/swipebox.css"		 rel="stylesheet" type="text/css">
+		<link href="styles/font-awesome.css"	 rel="stylesheet" type="text/css">
+		<link href="styles/animate.css"			 rel="stylesheet" type="text/css">
+		<link href="styles/css.css"			 rel="stylesheet" type="text/css">
+
+		<script type="text/javascript" src="scripts/jquery.js"></script>
+		<script type="text/javascript" src="scripts/jqueryui.js"></script>
+		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
+		<script type="text/javascript" src="scripts/framework.plugins.js"></script>
+		<script type="text/javascript" src="scripts/custom.js"></script>
+		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<script type="text/javascript" src="scripts/constantes.js"></script>
+		<script type="text/javascript" src="scripts/util.js"></script>
+		<script type="text/javascript" src="scripts/md5.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			/*var c = {"token":"03xm2d4wk99ckvgk24mb","cambios":[{"idPed": 1,"est": 4,"idNeg": 10,"ts": 1415877437},{"idPed": 1,"est": 3,"idNeg": -1,"ts": 1415877780}]};
+			hayRed = true;
+			fpost(URL_SUBIR_CAMBIOS, c);
+			*/
+			function login(){
+				url = URL_LOGIN
+				console.log( 'md5(ALEX) = '+ CryptoJS.MD5('ALEX'));
+				data = {
+					"username":$j('#username').val(),
+					"password":$j('#password').val()
+				};
+				//.......................
+				data = {'username':'pablo','password':'d99fa67519d0e3e5990b0238e9c56e19'};
+				url = URL_LOGIN+'?'+PAR_USERNAME+'=pablo&'+PAR_PASSWORD+'=d99fa67519d0e3e5990b0238e9c56e19';
+				url = URL_LOGIN;
+				console.log(data);
+				//json = fget(url);
+				json = fpost(url, data);
+				//window.localStorage.setItem(USERNAME, $j('#username').val());
+				checkLogin(json);
+				return false;
+			}
+
+	        document.addEventListener("deviceready", onDeviceReady, false);
+			function onDeviceReady() {
+				checkConnection();
+				$j(".ui-loader").hide();
+		    }
+			document.addEventListener("backbutton", onBackKeyDown, false);
+			function onBackKeyDown() {
+				exitApp();
+			} 
+		</script>  
+	</head>
+	<body onload="onDeviceReady();">
+		<div class="all-elements">
+			<div id="perspective" class="perspective effect-airbnb"><!--this houses the entire page, and creates the effect-->
+				<div class="outer-nav">
+					<div class="inner-nav">
+					</div>
+				</div>
+				<div class="perspective_container"><!--the "moving to the left" content box-->
+					<div class="wrapper"><!-- wrapper needed for scroll -->
+						<div class="header-clear"><i class="fa fa-times"></i></div>
+						<div class="content">
+							<div class="content-strip">
+								<h4>Aloha24</h4>
+								<p>Introduce tus credenciales para acceder al sistema.</p>
+								<i class="fa fa-cogs"></i>
+								<div class="overlay"></div>
+								<div class="logo">
+									<img alt="img" src="images/logo-aloha.png">			
+								</div>
+							</div>
+							<div class="decoration"></div>
+							<div class="container no-bottom">
+								<h4>Aloha24</h4>
+								<!--<form class="contactForm">-->
+									<fieldset>
+										<div class="formValidationError" id="contactNameFieldError">
+											<div class="static-notification-red tap-dismiss-notification">
+												<p class="center-text uppercase">Name is required!</p>
+											</div>
+										</div>
+										<div class="formFieldWrap">
+											<label class="field-title contactNameField" for="username">Usuario:</label>
+											<input type="text"  name="username" id="username"  class="contactField requiredField" value="" placeholder="Nombre de usuario" />
+										</div>
+										<div class="formFieldWrap">
+											<label class="field-title contactNameField" for="password">Usuario:</label>
+											<input type="password"  name="password" id="password"  class="contactField requiredField" value="" placeholder="Password" onClick="login();"/>
+										</div>
+										<div class="formSubmitButtonErrorsWrap">
+											<button class="buttonWrap button button-green contactSubmitButton" id="btnLogin" onClick="login();">Acceder</button>
+										</div>
+									</fieldset>
+								<!--</form>-->
+							</div>
+							<div class="decoration"></div>
+						</div>
+					
+					</div><!-- wrapper -->
+				</div><!-- /perspective container -->
+			</div><!-- /perspective -->
+		</div>
+
+	</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

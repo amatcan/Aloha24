@@ -1,0 +1,202 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/splash/splash-icon.png">
+		<link rel="apple-touch-startup-image" href="images/splash/splash-screen.png" 			media="screen and (max-device-width: 320px)" />  
+		<link rel="apple-touch-startup-image" href="images/splash/splash-screen@2x.png" 		media="(max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 2)" /> 
+		<link rel="apple-touch-startup-image" sizes="640x1096" href="images/splash/splash-screen@3x.png" />
+		<link rel="apple-touch-startup-image" sizes="1024x748" href="images/splash/splash-screen-ipad-landscape" media="screen and (min-device-width : 481px) and (max-device-width : 1024px) and (orientation : landscape)" />
+		<link rel="apple-touch-startup-image" sizes="768x1004" href="images/splash/splash-screen-ipad-portrait.png" media="screen and (min-device-width : 481px) and (max-device-width : 1024px) and (orientation : portrait)" />
+		<link rel="apple-touch-startup-image" sizes="1536x2008" href="images/splash/splash-screen-ipad-portrait-retina.png"   media="(device-width: 768px)	and (orientation: portrait)	and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" sizes="1496x2048" href="images/splash/splash-screen-ipad-landscape-retina.png"   media="(device-width: 768px)	and (orientation: landscape)	and (-webkit-device-pixel-ratio: 2)"/>
+
+		<title>Aloha24</title>
+
+		<link href="styles/style.css"     		 rel="stylesheet" type="text/css">
+		<link href="styles/framework.css" 		 rel="stylesheet" type="text/css">
+		<link href="styles/menu.css" 		 	 rel="stylesheet" type="text/css">
+		<link href="styles/owl.theme.css" 		 rel="stylesheet" type="text/css">
+		<link href="styles/swipebox.css"		 rel="stylesheet" type="text/css">
+		<link href="styles/font-awesome.css"	 rel="stylesheet" type="text/css">
+		<link href="styles/animate.css"			 rel="stylesheet" type="text/css">
+		<link href="styles/css.css"			 rel="stylesheet" type="text/css">
+
+		<script type="text/javascript" src="scripts/jquery.js"></script>
+		<script type="text/javascript" src="scripts/jqueryui.js"></script>
+		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
+		<script type="text/javascript" src="scripts/framework.plugins.js"></script>		
+		<script type="text/javascript" src="scripts/custom.js"></script>
+		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<script type="text/javascript" src="scripts/constantes.js"></script>
+		<script type="text/javascript" src="scripts/util.js"></script>
+		<script type="text/javascript" src="scripts/md5.js"></script>
+		<script type="text/javascript" charset="utf-8">
+		
+			//Permite localizar el pedido actual, si lo hay
+			var pedidoActual = -1;
+			var token = '';
+			/**
+			Actualiza el interface de usuario con la información de la tarea asignada.
+			*/
+			function updateInterface(){
+				usuario = window.localStorage.getItem("username");
+		    	$j('#usuario').text(usuario);
+				tarea = getTarea();
+				if (tarea != undefined){
+					pedidoActual = getPedidoActual(tarea);
+					if (pedidoActual != null)
+						pedidoActual = pedidoActual.pedido.id;
+					else
+						pedidoActual = -1;	
+					actualizaNotificaciones(tarea);
+					pedidos = tarea.pedidos;
+					pintaPedidos(pedidos);
+					
+					
+				}else{
+					//No hay tarea.....
+					alert("No tiene pedidos asignados.");
+				}
+			}
+			/**
+			Pinta la lista de los pedidos asignados en la tarea. Si no hay pedido en curso, solo podrá coger el primer pedido que no esté entregado para iniciarlo y el resto solo podrá consultarlo.
+			@param pedidos Pedidos a pintar.
+			*/
+			function pintaPedidos(pedidos){
+				if (pedidos.length > 0){
+					$j('#pedidos').html('');
+					for(i=0;i<pedidos.length;i++){
+						funcionalidad = '';
+						//si no hay pedido en curso
+						if (pedidoActual == -1){
+							//Si es el primero sin entregar
+							if (i>0){
+								//Si el anterior está entregado y este no, entoces es el primero sin entregar y se puede coger.
+								if (pedidos[i-1].pedido.estado == PEDIDO_ESTADO_CERRADO && pedidos[i].pedido.estado != PEDIDO_ESTADO_CERRADO)
+									funcionalidad = 'onClick="return confirmarPuestaPedidoEnCurso('+pedidos[i].pedido.id+');"';
+							}else 
+								//Posición 0, por lo que es el primero
+								funcionalidad = 'onClick = "return confirmarPuestaPedidoEnCurso('+pedidos[i].pedido.id+');"';
+						}
+						html = pintaPedido(pedidos[i], i+1, funcionalidad);
+						$j('#pedidos').append(html);
+					}				
+				}
+		    }
+			
+			function pintaPedido(pedido, orden, funcionalidad){
+				if (pedido.pedido.estado == PEDIDO_ESTADO_CERRADO){
+					removePedido(pedido.pedido.id);
+					return;
+				}
+				estilo = '';
+				if (pedido.pedido.estado == undefined)
+					pedido.pedido.estado = PEDIDO_ESTADO_ASIGNADO;
+				switch (parseInt(pedido.pedido.estado)){
+					case PEDIDO_ESTADO_ASIGNADO:
+					case null:
+						estilo = 'pedido-default';
+						break;
+					case PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO:
+					case PEDIDO_NEGOCIO_ESTADO_ESPERANDO:
+					case PEDIDO_ESTADO_EN_ENTREGA:
+					case PEDIDO_ESTADO_ENTREGANDO:
+						estilo = 'pedido-en-curso';
+						break;
+					case PEDIDO_ESTADO_CERRADO:
+						estilo = 'pedido-entregado';
+						break;
+					default:
+						estilo = 'pedido-default';
+				}
+				
+				ahtml = '<a rel="external" '+(funcionalidad!=null?funcionalidad:'')+' href="'+PAGE_DETALLE_PEDIDO+'?'+ID+'='+pedido.pedido.id+'" ';
+				
+				html = '<ul class="pedido '+estilo+'" id="PED_'+pedido.pedido.id+'">';
+				html += '<li class="orden">'+ahtml+' id="ORDEN_'+pedido.pedido.id+'">'+orden+'</a></li>';
+				html += '<li class="referencia">'+ahtml+' id="REF_'+pedido.pedido.id+'">'+pedido.pedido.ref+'</a></li>';
+				html += '<li class="direccion">'+ahtml+' id="DIR_'+pedido.pedido.id+'">'+pedido.cliente.direccion+'</a></li>';
+				html += '<li class="mapa"><a class="boton button-blue" id="MAPA_'+pedido.pedido.id+'" onClick="verCliente('+pedido.pedido.id+');"><i class="fa fa-globe"></i> </a></li>';
+				html += '</ul>';
+				
+/*				html = '<tr class="'+estilo+'">';
+				html += '<td class="">'+ahtml+' id="ORDEN_'+pedido.pedido.id+'">'+orden+'</a></td>';
+				html += '<td class="">'+ahtml+'id="DIR_'+pedido.pedido.id+'">'+pedido.cliente.direccion+'</a></td>';
+				html += '<td class=""><a class="boton boton-azul"><i class="fa fa-globe"></i> Mapa</a></td>';
+				html += '</tr>';
+				*/
+				return html;
+			}
+			
+			function verCliente(id){
+				window.location = PAGE_MAPA + '?' + PAR_PEDIDO_ID + '=' + id;
+			}
+			//document.addEventListener("deviceready", onDeviceReady, false);
+			function onDeviceReady() {
+				inicializacionEntorno();
+				updateInterface();
+				
+		    } 
+		</script>  
+	</head>
+	<body onload="onDeviceReady();">
+		<div class="all-elements">
+			<div id="perspective" class="perspective effect-airbnb"><!--this houses the entire page, and creates the effect-->
+				<div class="header">
+					<a href="#" id="showMenu"><i class="fa fa-navicon"></i></a>
+					<div class="notificaciones">
+						<div id="hayRed">
+						</div>
+						<div id="hayGeo">
+						</div>
+					</div>
+				</div> 	
+				<div class="outer-nav">
+					<div class="inner-nav">
+						<div class="nav-item">
+							<a href="pedidos.html">
+								<i class="nav-icon fa fa-list"></i>
+								Pedidos
+							</a>
+						</div>
+						<div class="nav-item">
+							<a href="tel:98765443">
+								<i class="nav-icon fa fa-phone"></i>
+								Central
+							</a>
+						</div>
+						<div class="nav-item">
+							<a id="closeMenu" href="#">
+								<i class="nav-icon fa fa-times"></i>
+								On/Off
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="perspective_container"><!--the "moving to the left" content box-->
+					<div class="wrapper"><!-- wrapper needed for scroll -->
+						<div class="header-clear"><i class="fa fa-times"></i></div>
+						<div class="decoration"></div>
+						
+						<div class="content">
+							<div class="container no-bottom">
+								<h3>Pedidos</h3>
+								<section id="pedidos">
+								</section>
+							</div>
+						</div><!--content-->
+					</div><!-- wrapper -->
+				</div><!-- /perspective container -->
+			</div><!-- /perspective -->
+
+			</div>
+
+			<script type="text/javascript" src="scripts/menu.js"></script>
+
+			</body>
+</html>

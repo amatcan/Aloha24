@@ -1,0 +1,398 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/splash/splash-icon.png">
+		<link rel="apple-touch-startup-image" href="images/splash/splash-screen.png" 			media="screen and (max-device-width: 320px)" />  
+		<link rel="apple-touch-startup-image" href="images/splash/splash-screen@2x.png" 		media="(max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 2)" /> 
+		<link rel="apple-touch-startup-image" sizes="640x1096" href="images/splash/splash-screen@3x.png" />
+		<link rel="apple-touch-startup-image" sizes="1024x748" href="images/splash/splash-screen-ipad-landscape" media="screen and (min-device-width : 481px) and (max-device-width : 1024px) and (orientation : landscape)" />
+		<link rel="apple-touch-startup-image" sizes="768x1004" href="images/splash/splash-screen-ipad-portrait.png" media="screen and (min-device-width : 481px) and (max-device-width : 1024px) and (orientation : portrait)" />
+		<link rel="apple-touch-startup-image" sizes="1536x2008" href="images/splash/splash-screen-ipad-portrait-retina.png"   media="(device-width: 768px)	and (orientation: portrait)	and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" sizes="1496x2048" href="images/splash/splash-screen-ipad-landscape-retina.png"   media="(device-width: 768px)	and (orientation: landscape)	and (-webkit-device-pixel-ratio: 2)"/>
+
+		<title>Aloha24</title>
+
+		<link href="styles/style.css"     		 rel="stylesheet" type="text/css">
+		<link href="styles/framework.css" 		 rel="stylesheet" type="text/css">
+		<link href="styles/menu.css" 		 	 rel="stylesheet" type="text/css">
+		<link href="styles/owl.theme.css" 		 rel="stylesheet" type="text/css">
+		<link href="styles/swipebox.css"		 rel="stylesheet" type="text/css">
+		<link href="styles/font-awesome.css"	 rel="stylesheet" type="text/css">
+		<link href="styles/animate.css"			 rel="stylesheet" type="text/css">
+		<link href="styles/css.css"			 rel="stylesheet" type="text/css">
+
+		<script type="text/javascript" src="scripts/jquery.js"></script>
+		<script type="text/javascript" src="scripts/jqueryui.js"></script>
+		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
+		<script type="text/javascript" src="scripts/framework.plugins.js"></script>
+		<script type="text/javascript" src="scripts/custom.js"></script>
+		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<script type="text/javascript" src="scripts/constantes.js"></script>
+		<script type="text/javascript" src="scripts/util.js"></script>
+		<script type="text/javascript" src="scripts/md5.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			console.log("Empezamos...");
+			var latitud = 0;
+		    var longitud = 0;
+			
+			
+			function updateInterface(){				
+		    	usuario = window.localStorage.getItem("username");
+				tarea = getTarea();
+				if (tarea != undefined){
+					inicializaInterfaze(tarea);
+					idPedido = $j.getParamFromUrl(ID);
+					if (idPedido == -1)
+						return;
+					//Si no es el pedido en curso, no se puede editar
+					pedidoActual = getPedidoActual(tarea);
+					if (pedidoActual == null || pedidoActual.pedido.id != idPedido){
+						$j('#content').addClass('desabilitado');
+						alert("No es el pedido que actualmente está gestionando, por lo que no podrá modifcar su información.");
+					}
+					pedido = getPedidoPorId(idPedido, tarea);
+					pintaPedido(pedido);
+				}
+		    }
+			function pintaPedido(pedido){
+				console.log("pintando pedido: "+pedido);
+				pintaNegocios(pedido);
+				pintaCliente(pedido.cliente);
+				pintaDatosDePago(pedido.pedido);
+				pintaComentario(pedido.pedido);
+				pintaBotonConfirmacion(pedido.pedido);
+			}
+			function pintaBotonConfirmacion(pedido){				
+				disable1 = true;
+				disable2 = true;
+				estilo1 = '';
+				estilo2 = '';
+				//mientras no estén visitados todos los negocios, no se puede interaccionar con los botones
+				if (pedido.empaquetado == PEDIDO_PAQUETE_COMPLETO){
+					if (pedido.estado == PEDIDO_ESTADO_EN_ENTREGA){
+						estilo1 = 'button-red';
+						estilo2 = 'button-grey';
+						disable1 = false;
+						disable2 = true;
+					}
+					else{
+						if (pedido.estado == PEDIDO_ESTADO_ENTREGANDO){
+							estilo1 = 'button-green';
+							estilo2 = 'button-red';
+							disable1 = true;
+							disable2 = false;
+						}else{
+							estilo1 = 'button-grey';
+							estilo2 = 'button-grey';
+						}
+					}
+				}else{
+					estilo1 = 'button-grey';
+					estilo2 = 'button-grey';
+				}
+				html = '<a id="alcanzado" class="button '+estilo1+'" ';
+				if (disable1)
+					html += 'disabled="disabled" ';
+				else
+					html += 'href="#" onClick="confirmaLlegadaAlCliente('+pedido.id+');"';
+				html +='>En cliente</a>';
+				$j('#enCliente').html(html);
+				
+				html = '<a id="alcanzado" class="button '+estilo2+'" ';
+				if (disable2)
+					html += 'disabled="disabled" ';
+				else
+					html += 'href="#" onClick="confirmaEntregaPedido('+pedido.id+');"';
+				html +='>Entregado</a>';
+				$j('#confirmacion').html(html);
+			}
+			/**
+			Función para confirmar que el repartido ha llegado al cliente, pero no ha entregado el pedido aún.
+			@param id Del pedido a gestionar
+			*/
+			function confirmaLlegadaAlCliente(id){
+				tarea = getTarea();
+				if (tarea != undefined){
+					token = getToken();
+					code = setPedidoEnCliente(id);
+					if (code == RETURN_CODE_OK || code == RETURN_CODE_OK_SIN_RED){
+						//Se actualiza el boton	
+						pedido = getPedidoPorId(id, tarea);
+						pintaBotonConfirmacion(pedido.pedido);
+					}else
+						if (code == RETURN_CODE_UPDATE){
+							//se actualizaría el interface completo
+						}
+				}
+			}
+			/**
+			Confirma la entrega de un pedido. De este modo, el pedido queda completado.
+			@param id Identificador del pedido
+			*/
+			function confirmaEntregaPedido(id){
+				tarea = getTarea();
+				if (tarea != undefined){
+					token = getToken();
+					code = setPedidoEntregado(id);
+					if (code == RETURN_CODE_OK || code == RETURN_CODE_OK_SIN_RED){
+						//Se actualiza el boton	
+						pedido = getPedidoPorId(id, tarea);
+						pintaBotonConfirmacion(pedido.pedido);
+					}else
+						if (code == RETURN_CODE_UPDATE){
+							//se actualizaría el interface completo
+						}
+				}
+			}
+			/**
+			Pinta el comentario de un pedido.
+			*/
+			function pintaComentario(pedido){
+				html = ' <p class="center-text uppercase">'+pedido.comentarios+'</p>';
+				$j('#comentario').append(html);
+			}
+			/**
+			Actualiza la presentación de un negocio.
+			@param idPedido Identificador del pedido al que pertenece ese negocio
+			@param negocio Negocio a actualizar
+			*/
+			function actualizaHtmlNegocioPorPosicion(pedido, posicion){
+				if (pedido == undefined || pedido == null)
+					return;
+				negocio = pedido.negocios[posicion];
+				if (negocio != null){
+					//Actualiza el menu del negocio
+					borraHtml('MENU_NG_'+pedido.id+'_'+negocio.id);
+					html = getHtmlMenuNegocio(pedido.id, negocio);
+					$j('#MENU_NG_'+pedido.id+'_'+negocio.id).html(html);
+					
+					borraHtml('ICO_NG_'+pedido.id+'_'+negocio.id);
+					html = getHtmlIconoNegocio(negocio);
+					$j('#ICO_NG_'+pedido.id+'_'+negocio.id).html(html);
+					
+					//Si hay más negocios y este está ya recogido, se actualiza el menú del siguiente
+					if ((negocio.estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO || negocio.estado == PEDIDO_NEGOCIO_ESTADO_ANULADO) && ((posicion+1) < pedido.negocios.length)){
+						negocio = pedido.negocios[posicion+1];
+						//se pone en ruta
+						borraHtml('MENU_NG_'+pedido.id+'_'+negocio.id);
+						html = getHtmlMenuNegocio(pedido.id, negocio);
+						$j('#MENU_NG_'+pedido.id+'_'+negocio.id).html(html);
+					}
+					//si no hay más negocios se actualiza la confirmación de entrega
+					if (posicion+1==pedido.negocios.length){
+						pintaBotonConfirmacion(pedido);
+					}
+				}
+			}
+			/**
+			Pinta los negocios que componen el pedido.
+			@param pedido Pedido del que pintar los negocios.
+			*/
+			function pintaNegocios(pedido){
+				idPedido = pedido.pedido.id;
+				negocios = pedido.pedido.negocios;
+				console.log(negocios);
+				html = '';				
+				for(i=0;i<negocios.length;i++){
+					menuHabilitado = false;
+					negocio = negocios[i];
+					if (i > 0)
+						negocioAnterior = negocios[i-1];
+					else
+						negocioAnterior = null;
+					if (negocioAnterior == null && negocio.estado != PEDIDO_NEGOCIO_ESTADO_RECOGIDO)
+						menuHabilitado = true;
+					else{
+						if (negocioAnterior != null && (negocioAnterior.estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO && negocio.estado != PEDIDO_NEGOCIO_ESTADO_RECOGIDO))
+							menuHabilitado = true;
+						else
+							menuHabilitado = false;
+					}
+					html += '<ul class="negocio" id="NEG_'+pedido.pedido.id+'_'+negocio.id+'">';
+					html += '<li class="menu" id="MENU_NG_'+pedido.pedido.id+'_'+negocio.id+'">';
+					html += getHtmlMenuNegocio(idPedido, negocio, menuHabilitado)+'</li>';
+					html += '<li class="icono" id="ICO_NG_'+pedido.pedido.id+'_'+negocio.id+'">';
+					html += getHtmlIconoNegocio(negocio);
+					html +='</li>';
+					html += '<li class="detalle">'+negocio.nombre+'</li>';
+					html += '<li class="mapa"><a class="boton button-blue" id="MAPA_'+pedido.pedido.id+'_'+negocio.id+'"><i class="fa fa-globe"></i> </a></li>';
+					html += '</ul>';
+					/*
+					html += '<tr>';
+					html += '<td id="MENU_NG_'+pedido.pedido.id+'_'+negocio.id+'">';
+					html += getHtmlMenuNegocio(idPedido, negocio, menuHabilitado)+'</td>';
+					html += '<td id="ICO_NG_'+pedido.pedido.id+'_'+negocio.id+'">';
+					html += getHtmlIconoNegocio(negocio);
+					html +='</td>';
+					html += '<td><h5><a href="tel:'+negocio.telefono+'"><i class="fa fa-phone"> </i> '+negocio.nombre+'</a></h5><p><small>'+negocio.direccion+'</small></p></td>'
+					html += '</tr>';
+					*/
+				}
+				$j('#negocios').html(html);
+			}
+
+
+			/**
+			Obtiene el html para pintar el menu para la gestión de un negocio de un pedido. 
+			@param idPedido Identificador del pedido
+			@param negocio Negocio dentro del pedido			
+			@param habilitado Indica si habilita o no el menu
+			*/
+			function getHtmlMenuNegocio(idPedido, negocio, habilitado){
+				html_menu = '';
+				if (habilitado != undefined && !habilitado){
+					if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO)
+						html_menu = '<a class="boton button-green" title="El paquete ya se recogió."><i class="fa fa-check"></i></a>';						
+					else
+						html_menu = '<a class="boton button-red" title="Este negocio está pendiente de ir a recoger el paquete."><i class="fa fa-times"></i></a>';						
+					return html_menu;
+				}
+				disabled = false;
+				if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO){
+					estiloBtn = 'button-green';
+					disabled = true;
+				}
+								
+				if (disabled)
+					html_menu += '<a class="boton button-green" disabled="disabled" title="Recogido"><i class="fa fa-times"></i></a>';
+				else{					
+					if (negocio.estado == undefined || negocio.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO || negocio.estado == SIN_ESTADO){
+						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_ESPERANDO+');" class="boton button-yellow" title="Acabo de llegar al negocio y espero que me den el paquete."><i class="fa fa-clock-o"></i></a>';	
+					}
+					if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_ESPERANDO){
+						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_RECOGIDO+');" class="boton button-orange" title="Acabo de recoger el paquete y continuo con el pedido."><i class="fa fa-truck"></i></a>';
+					}
+					
+				}
+				return html_menu;
+				
+			}
+			/**
+			Pinta toda la información de un cliente
+			@param cliente Cliente a pintar
+			*/
+			function pintaCliente(cliente){			
+				html = '<h2>'+cliente.nombre+'</h2><p class="center-text uppercase">'+cliente.direccion+'</h2>';
+				html += '<p class="telefono"><a href="tel:'+cliente.telefono+'">'+cliente.telefono+'</a></p>';
+				$j('#entrega').html(html);
+			}
+			/**
+			Pinta la información de pago de un pedido.
+			@param pedido Pedido del que pintar la forma de pago.
+			*/
+			function pintaDatosDePago(pedido){
+				html = '<div class="precio">'+pedido.total+'&euro;</div>';
+				img = getImagenPago(pedido.formaPago);
+				html += '<div class="forma-pago"><img src="'+img+'"/></div>';
+				$j('#pago').html(html);
+			}
+
+			document.addEventListener("deviceready", onDeviceReady, false);
+			function onDeviceReady() {
+				console.log("ready...");
+				inicializacionEntorno();
+				updateInterface();
+
+		    } 
+		</script>
+	</head>
+	<body onload="onDeviceReady();">
+		<div class="all-elements">
+			<div id="perspective" class="perspective effect-airbnb"><!--this houses the entire page, and creates the effect-->
+				<div class="header">
+					<a href="#" id="showMenu"><i class="fa fa-navicon"></i></a>
+					<div class="notificaciones">
+						<div id="hayRed">
+						</div>
+						<div id="hayGeo">
+						</div>
+					</div>
+				</div> 	
+				<div class="outer-nav">
+					<div class="inner-nav">
+						<div class="nav-item">
+							<a rel="external" href="pedidos.html">
+								<i class="nav-icon fa fa-list"></i>
+								Pedidos
+							</a>
+						</div>
+						<div class="nav-item">
+							<a href="tel:98765443">
+								<i class="nav-icon fa fa-phone"></i>
+								Central
+							</a>
+						</div>
+						<div class="nav-item">
+							<a id="closeMenu" href="#">
+								<i class="nav-icon fa fa-times"></i>
+								On/Off
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="perspective_container"><!--the "moving to the left" content box-->
+					<div class="wrapper"><!-- wrapper needed for scroll -->
+						<div class="header-clear"><i class="fa fa-times"></i></div>
+						<div class="decoration"></div>
+						<div class="content">
+							<div class="container no-bottom">
+								<h3>Pedido en curso</h3>
+								<section id="negocios" class="negocios">
+								</section>
+							</div>
+							<div class="decoration"></div>
+							<div class="container no-bottom">
+								<h3>Comentarios</h3>
+								<script>
+									function machaca(){
+										hayRed=true;
+										sincronizarTarea();
+										hayRed=false;
+									}
+								</script>
+								<a  onClick="machaca();">Enviar cambios</a>
+								<div id="comentario" class="caja-texto" role="alert">
+								</div>
+							</div>
+							<div class="decoration"></div>
+							<div class="container no-bottom">
+								<h3>Datos de entrega</h3>
+								<div class="one-half-responsive" >
+									<div class="cuadro" id="entrega">
+										
+									</div>
+								</div>
+								<div class="one-half-responsive-last">
+									<div class="cuadro" id="pago">
+									</div>
+								</div>
+							</div>
+							<div class="decoration"></div>
+							<div class="container no-bottom">
+								<div class="one-third-responsive full-bottom">
+								</div>
+								<div class="one-third-responsive full-bottom">
+								</div>
+								<div class="one-third-responsive last-column full-bottom confirma">
+									<div class="btn-enCliente" id="enCliente">
+									</div>
+									<div class="btn-entregado" id="confirmacion">
+									</div>
+								</div>
+							</div>
+						</div><!--content-->
+					</div><!-- wrapper -->
+				</div><!-- /perspective container -->
+			</div><!-- /perspective -->
+
+			</div>
+
+			<script type="text/javascript" src="scripts/menu.js"></script>
+
+			</body>
+</html>

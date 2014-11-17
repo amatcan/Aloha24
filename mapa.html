@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta charset="utf-8" />
+
+		<meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimal-ui"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/splash/splash-icon.png">
+		<link rel="apple-touch-startup-image" href="images/splash/splash-screen.png" 			media="screen and (max-device-width: 320px)" />  
+		<link rel="apple-touch-startup-image" href="images/splash/splash-screen@2x.png" 		media="(max-device-width: 480px) and (-webkit-min-device-pixel-ratio: 2)" /> 
+		<link rel="apple-touch-startup-image" sizes="640x1096" href="images/splash/splash-screen@3x.png" />
+		<link rel="apple-touch-startup-image" sizes="1024x748" href="images/splash/splash-screen-ipad-landscape" media="screen and (min-device-width : 481px) and (max-device-width : 1024px) and (orientation : landscape)" />
+		<link rel="apple-touch-startup-image" sizes="768x1004" href="images/splash/splash-screen-ipad-portrait.png" media="screen and (min-device-width : 481px) and (max-device-width : 1024px) and (orientation : portrait)" />
+		<link rel="apple-touch-startup-image" sizes="1536x2008" href="images/splash/splash-screen-ipad-portrait-retina.png"   media="(device-width: 768px)	and (orientation: portrait)	and (-webkit-device-pixel-ratio: 2)"/>
+		<link rel="apple-touch-startup-image" sizes="1496x2048" href="images/splash/splash-screen-ipad-landscape-retina.png"   media="(device-width: 768px)	and (orientation: landscape)	and (-webkit-device-pixel-ratio: 2)"/>
+
+		<title>Aloha24</title>
+
+		<!--<link href="styles/style.css"     		 rel="stylesheet" type="text/css">
+		<link href="styles/framework.css" 		 rel="stylesheet" type="text/css">
+		<link href="styles/menu.css" 		 	 rel="stylesheet" type="text/css">
+		<link href="styles/owl.theme.css" 		 rel="stylesheet" type="text/css">
+		<link href="styles/swipebox.css"		 rel="stylesheet" type="text/css">
+		
+		<link href="styles/animate.css"			 rel="stylesheet" type="text/css">-->
+		<link href="styles/font-awesome.css"	 rel="stylesheet" type="text/css"/>
+		<link href="styles/css.css"			 rel="stylesheet" type="text/css"/>
+
+		<script type="text/javascript" src="scripts/jquery.js"></script>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&language=es"></script>
+		<!--<script type="text/javascript" src="scripts/jqueryui.js"></script>
+		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
+		<script type="text/javascript" src="scripts/framework.plugins.js"></script>		
+		<script type="text/javascript" src="scripts/custom.js"></script>-->
+		
+		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<script type="text/javascript" src="scripts/constantes.js"></script>
+		<script type="text/javascript" src="scripts/util.js"></script>
+		<script type="text/javascript" src="scripts/md5.js"></script>
+		
+
+		<script type="text/javascript" charset="utf-8">
+			var map;
+			/**
+			Pinta el mapa centrado en un punto
+			@param posicion Centro del mapa
+			@titulo titulo para el marker del centrado
+			*/			
+			function initializeMapa(posicion, titulo) {
+				var latlon = new google.maps.LatLng(posicion.lat, posicion.lng);
+				var mapOptions = {
+					zoom: 16,
+					center: latlon,
+					mapTypeId: google.maps.MapTypeId.ROADMAP
+				};
+				map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
+				posicion = getPosicion();
+				var bounds = new google.maps.LatLngBounds ();
+				bounds.extend(latlon);
+				if (posicion != undefined && posicion.latitud != undefined){
+					bounds.extend(new google.maps.LatLng(posicion.latitud, posicion.longitud)); 
+					var usted = new google.maps.Marker({
+						position: new google.maps.LatLng(posicion.latitud, posicion.longitud),
+						map: map,
+						title: 'Usted está aquí.',
+						icon:'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+						animation: google.maps.Animation.DROP,
+					});
+				}
+				var marker = new google.maps.Marker({
+					position: latlon,
+					map: map,
+					title: titulo != undefined?titulo:'',
+					icon:'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+				});
+				map.fitBounds(bounds);
+			}
+			/**
+			Convierte las coordenadas en un string en un JSON.
+			@param String tipo "x,y"
+			@return JSON tipo {lat:x,lng:y}, null si no se puede
+			*/
+			function coordenadas2JSON(coordenadas){
+				partes = coordenadas.split(',');
+				if (partes == null)
+					return null;
+				if (partes.length == 0)
+					return null;
+				return {lat:partes[0], lng:partes[1]};
+			}
+			/**
+			Se encarga de pintar el mapa.
+			*/
+			function pintaMapa(){
+				idPedido = $j.getParamFromUrl(PAR_PEDIDO_ID);
+				//si no hay información sobre el pedido, se puede pintar la central
+				if (idPedido == null){
+					alert("Todavía no tenemos datos de la central");					
+				}else{
+					idNegocio = $j.getParamFromUrl(PAR_NEGOCIO_ID);
+					//No hay negocio, se pinta el cliente
+					if (idNegocio == null){
+						pedido = getPedidoPorId(idPedido);
+						posicion = coordenadas2JSON(pedido.cliente.coordenadas);
+						initializeMapa(posicion, pedido.cliente.direccion);
+						$j('#entradilla').html('Direcci&oacute;n de entrega del pedido.');
+						pintaCliente(pedido.cliente);
+												
+					}else{
+						//se `pinta el negocio.
+					}
+				}
+			}
+			
+			function pintaCliente(cliente){
+				html = '<p class="nombre">'+cliente.nombre+'</p>';
+				html += '<p class="direccion">'+cliente.direccion+'</p>';
+				html += '<p class="telefono"><a href="tel:'+cliente.telefono+'"><i class="fa fa-phone"> </i> '+cliente.telefono+'</a></p>';
+				$j('#info').html(html);
+			}
+			/**
+			Actualiza el interface de usuario con la información de la tarea asignada.
+			*/
+			function updateInterface(){
+				
+				pintaMapa();
+			}
+
+			
+			
+			//document.addEventListener("deviceready", onDeviceReady, false);
+			function onDeviceReady() {
+				inicializacionEntorno();
+				updateInterface();
+				
+		    } 
+		</script>  
+
+	</head>
+	<body class="mi-body" onload="onDeviceReady();">
+		<div class="mi-header">
+			<span class="atras" onClick="window.history.back();"><i class="fa fa-chevron-left"></i>ATR&Aacute;S</span>
+		</div>
+		<div class="mi-contenedor">
+			<div id="entradilla" class="entradilla">
+			</div>
+			<div id="map-canvas" class="gmap">
+			</div>
+			<div class="informacion" id="info">
+			</div>
+		</div>
+	</body>
+</html>
