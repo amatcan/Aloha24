@@ -31,7 +31,7 @@
 		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
 		<script type="text/javascript" src="scripts/framework.plugins.js"></script>
 		<script type="text/javascript" src="scripts/custom.js"></script>
-		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>
 		<script type="text/javascript" src="scripts/constantes.js"></script>
 		<script type="text/javascript" src="scripts/util.js"></script>
 		<script type="text/javascript" src="scripts/md5.js"></script>
@@ -247,9 +247,9 @@
 				html_menu = '';
 				if (habilitado != undefined && !habilitado){
 					if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO)
-						html_menu = '<a class="boton button-green" title="El paquete ya se recogió."><i class="fa fa-check"></i></a>';						
+						html_menu = '<a class="boton no-activo button-green" title="El paquete ya se recogió."><i class="fa fa-check"></i></a>';						
 					else
-						html_menu = '<a class="boton button-red" title="Este negocio está pendiente de ir a recoger el paquete."><i class="fa fa-times"></i></a>';						
+						html_menu = '<a class="boton no-activo  button-red" title="Este negocio está pendiente de ir a recoger el paquete."><i class="fa fa-times"></i></a>';						
 					return html_menu;
 				}
 				disabled = false;
@@ -259,7 +259,7 @@
 				}
 								
 				if (disabled)
-					html_menu += '<a class="boton button-green" disabled="disabled" title="Recogido"><i class="fa fa-times"></i></a>';
+					html_menu += '<a class="boton no-activo  button-green" disabled="disabled" title="Recogido"><i class="fa fa-check"></i></a>';
 				else{					
 					if (negocio.estado == undefined || negocio.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO || negocio.estado == SIN_ESTADO){
 						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_ESPERANDO+');" class="boton button-yellow" title="Acabo de llegar al negocio y espero que me den el paquete."><i class="fa fa-clock-o"></i></a>';	
@@ -276,9 +276,10 @@
 			Pinta toda la información de un cliente
 			@param cliente Cliente a pintar
 			*/
-			function pintaCliente(cliente){			
-				html = '<h2>'+cliente.nombre+'</h2><p class="center-text uppercase">'+cliente.direccion+'</h2>';
-				html += '<p class="telefono"><a href="tel:'+cliente.telefono+'">'+cliente.telefono+'</a></p>';
+			function pintaCliente(cliente){
+				html = '<h3>Direcci&oacute;n de entrega</h3>'
+				html += '<p class="nombre">'+cliente.nombre+'</p><p class="direccion">'+cliente.direccion+'</p>';
+				html += '<p class="telefono"><a href="tel:'+cliente.telefono+'"><i class="fa fa-phone"> </i> '+cliente.telefono+'</a></p>';
 				$j('#entrega').html(html);
 			}
 			/**
@@ -286,9 +287,10 @@
 			@param pedido Pedido del que pintar la forma de pago.
 			*/
 			function pintaDatosDePago(pedido){
-				html = '<div class="precio">'+pedido.total+'&euro;</div>';
+				html = '<h3>Pago</h3>';
+				html += '<div class="precio">'+pedido.total+'&euro;</div>';
 				img = getImagenPago(pedido.formaPago);
-				html += '<div class="forma-pago"><img src="'+img+'"/></div>';
+				html += '<div class="forma-pago">'+pedido.formaPago+'</div>';
 				$j('#pago').html(html);
 			}
 
@@ -341,44 +343,36 @@
 						<div class="decoration"></div>
 						<div class="content">
 							<div class="container no-bottom">
-								<h3>Pedido en curso</h3>
-								<section id="negocios" class="negocios">
+								<h3>Negocios del pedido</h3>
+								<section id="negocios" class="contenedor">
 								</section>
 							</div>
 							<div class="decoration"></div>
 							<div class="container no-bottom">
-								<h3>Comentarios</h3>
-								<script>
+								<h3>Comentarios del cliente</h3>
+								<!--<script>
 									function machaca(){
 										hayRed=true;
 										sincronizarTarea();
 										hayRed=false;
 									}
 								</script>
-								<a  onClick="machaca();">Enviar cambios</a>
+								<a  onClick="machaca();">Enviar cambios</a>-->
 								<div id="comentario" class="caja-texto" role="alert">
 								</div>
 							</div>
 							<div class="decoration"></div>
 							<div class="container no-bottom">
 								<h3>Datos de entrega</h3>
-								<div class="one-half-responsive" >
-									<div class="cuadro" id="entrega">
-										
-									</div>
-								</div>
-								<div class="one-half-responsive-last">
-									<div class="cuadro" id="pago">
-									</div>
-								</div>
+								<section class="contenedor">
+									<section id="entrega" class="caja-mitad">
+									</section>
+									<section class="caja-mitad dcha" id="pago">
+									</section>
+								</section>
 							</div>
-							<div class="decoration"></div>
 							<div class="container no-bottom">
-								<div class="one-third-responsive full-bottom">
-								</div>
-								<div class="one-third-responsive full-bottom">
-								</div>
-								<div class="one-third-responsive last-column full-bottom confirma">
+								<div class="controles">
 									<div class="btn-enCliente" id="enCliente">
 									</div>
 									<div class="btn-entregado" id="confirmacion">

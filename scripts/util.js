@@ -3,7 +3,6 @@ var watchId;
 var onLine;
 var hayRed;
 var hayGeo;
-console.log("ONLI: "+onLine);
 var $j = jQuery.noConflict();
 
 //jQuery.mobile.ajaxEnabled=false;
@@ -17,8 +16,8 @@ incoherentes en la ejecución de la aplicación.
 */
 function inicializacionEntorno(){
 	onLine = window.localStorage.getItem(ONLINE)==undefined?true:window.localStorage.getItem(ONLINE);
-	hayRed = false;//window.localStorage.getItem("hayRed")==undefined?checkConnection():window.localStorage.getItem(HAY_RED);
-	$j(".ui-loader").hide();
+	hayRed = window.localStorage.getItem("hayRed")==undefined?checkConnection():window.localStorage.getItem(HAY_RED);
+	$j(".ui-loader").attr('style','display:none');
 	inicializaPosicionamiento();
 	setInterval(check, POOL_TIMEOUT);
 }
@@ -104,12 +103,6 @@ function exitApp(){
 			navigator.device.exitApp();
 		}
 	}
-	/*
-	function exitFromApp()
-            {
-                
-            }
-			*/
 }
 
 function enviarCambios(){
@@ -868,7 +861,7 @@ function getHtmlIconoNegocio(negocio){
 	if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO)
 		html_ico += '<i class="fa fa-check-square-o est-negocio est-negocio-recogido"></i>';
 	if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_ESPERANDO)
-		html_ico += '<i class="fa fa-gears est-negocio est-negocio-esperando"></i>';
+		html_ico += '<i class="fa fa-clock-o est-negocio est-negocio-esperando"></i>';
 	if (negocio.estado == undefined || negocio.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO || negocio.estado == SIN_ESTADO)
 		html_ico += '<i class="fa fa-exclamation est-negocio est-negocio-sin"></i>';
 	if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_ANULADO)

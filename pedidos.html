@@ -31,7 +31,7 @@
 		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
 		<script type="text/javascript" src="scripts/framework.plugins.js"></script>		
 		<script type="text/javascript" src="scripts/custom.js"></script>
-		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>
 		<script type="text/javascript" src="scripts/constantes.js"></script>
 		<script type="text/javascript" src="scripts/util.js"></script>
 		<script type="text/javascript" src="scripts/md5.js"></script>
@@ -118,30 +118,30 @@
 				ahtml = '<a rel="external" '+(funcionalidad!=null?funcionalidad:'')+' href="'+PAGE_DETALLE_PEDIDO+'?'+ID+'='+pedido.pedido.id+'" ';
 				
 				html = '<ul class="pedido '+estilo+'" id="PED_'+pedido.pedido.id+'">';
-				html += '<li class="orden">'+ahtml+' id="ORDEN_'+pedido.pedido.id+'">'+orden+'</a></li>';
+				//html += '<li class="orden">'+ahtml+' id="ORDEN_'+pedido.pedido.id+'">'+orden+'</a></li>';
 				html += '<li class="referencia">'+ahtml+' id="REF_'+pedido.pedido.id+'">'+pedido.pedido.ref+'</a></li>';
-				html += '<li class="direccion">'+ahtml+' id="DIR_'+pedido.pedido.id+'">'+pedido.cliente.direccion+'</a></li>';
-				html += '<li class="mapa"><a class="boton button-blue" id="MAPA_'+pedido.pedido.id+'" onClick="verCliente('+pedido.pedido.id+');"><i class="fa fa-globe"></i> </a></li>';
+				html += '<li class="direccion">'+pedido.cliente.direccion+'</li>';
+				html += '<li class="mapa"><a class="button button-blue" id="MAPA_'+pedido.pedido.id+'" onClick="verCliente('+pedido.pedido.id+');"><i class="fa fa-globe"></i> Mapa</a></li>';
 				html += '</ul>';
-				
-/*				html = '<tr class="'+estilo+'">';
-				html += '<td class="">'+ahtml+' id="ORDEN_'+pedido.pedido.id+'">'+orden+'</a></td>';
-				html += '<td class="">'+ahtml+'id="DIR_'+pedido.pedido.id+'">'+pedido.cliente.direccion+'</a></td>';
-				html += '<td class=""><a class="boton boton-azul"><i class="fa fa-globe"></i> Mapa</a></td>';
-				html += '</tr>';
-				*/
+
 				return html;
 			}
 			
 			function verCliente(id){
 				window.location = PAGE_MAPA + '?' + PAR_PEDIDO_ID + '=' + id;
 			}
-			//document.addEventListener("deviceready", onDeviceReady, false);
+			document.addEventListener("deviceready", onDeviceReady, false);
 			function onDeviceReady() {
 				inicializacionEntorno();
 				updateInterface();
 				
 		    } 
+			function reinicioPedidos(){
+				token = getToken();
+				c = {"token":token,"cambios":[{"idPed": 1,"est": 2,"idNeg": -1,"ts": 1415877437},{"idPed": 2,"est": 2,"idNeg": -1,"ts": 1415877780}]};
+				json = fpost(URL_SUBIR_CAMBIOS, c);
+				return true;
+			}
 		</script>  
 	</head>
 	<body onload="onDeviceReady();">
@@ -174,6 +174,12 @@
 							<a id="closeMenu" href="#">
 								<i class="nav-icon fa fa-times"></i>
 								On/Off
+							</a>
+						</div>
+						<div class="nav-item">
+							<a id="reinicio" onClick="reinicioPedidos();" href="index.html">
+								<i class="nav-icon fa fa-flash "></i>
+								Reinicio
 							</a>
 						</div>
 					</div>

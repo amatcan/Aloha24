@@ -12,7 +12,7 @@
 	</author>
 
 	<icon src="icon.png" gap:role="default" />
-	<preference name="orientation" value="landscape" />
+	<preference name="orientation" value="portrait" />
 		
 	<access origin="*" browserOnly="true"/>
 </widget>
