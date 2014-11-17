@@ -43,6 +43,7 @@ const ALTO_TITULO = 45;
 const ANCHO_NAV_PANEL = 65;
 const ONLINE = "online";
 const HAY_RED = "hayRed";
+const HAY_GEO = "hayGeo";
 const ID = "id";
 const POSICION = "posicion";
 const GEO_TIMEOUT = 30000;

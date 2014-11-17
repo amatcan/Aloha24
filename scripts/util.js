@@ -1,8 +1,8 @@
 var networkState;
 var watchId;
 var onLine;
-var hayRed;
-var hayGeo;
+var hayRed = false;
+var hayGeo = false;
 var $j = jQuery.noConflict();
 
 //jQuery.mobile.ajaxEnabled=false;
@@ -16,7 +16,8 @@ incoherentes en la ejecución de la aplicación.
 */
 function inicializacionEntorno(){
 	onLine = window.localStorage.getItem(ONLINE)==undefined?true:window.localStorage.getItem(ONLINE);
-	hayRed = window.localStorage.getItem("hayRed")==undefined?checkConnection():window.localStorage.getItem(HAY_RED);
+	hayRed = window.localStorage.getItem(HAY_RED)==undefined?checkConnection():window.localStorage.getItem(HAY_RED);
+	hayGeo = window.localStorage.getItem(HAY_GEO)==undefined?false:window.localStorage.getItem(HAY_GEO);
 	$j(".ui-loader").attr('style','display:none');
 	inicializaPosicionamiento();
 	setInterval(check, POOL_TIMEOUT);
@@ -41,12 +42,16 @@ function checkConnection() {
 		window.localStorage.setItem(HAY_RED, hayRed);
 		return hayRed;
 	}
+	if (navigator.onLine != undefined && navigator.onLine == true)
+	    hayRed = true;
+	else
+	    hayRed = false;
 	/*console.log("NOOOO hay red.....");
 	contaconta++;
 	if (contaconta >0 && contaconta < 4){	    
 	    hayRed = false;
 	}*/
-	hayRed = true;
+	
 	window.localStorage.setItem(HAY_RED, hayRed);
 	return hayRed;
 }
@@ -352,6 +357,13 @@ function checkLogin(json){
 		tarea = json;
 		cambios = getCambios();
 		if (cambios != undefined && cambios.cambios.length > 0){
+		    //antes de enviar los cambios se quitan de la tarea los pedidos cerrados
+		    for (i = 0;i<cambios.cambios.length;i++){
+		        cambio = cambios.cambios[i];
+		        if (cambio.est == PEDIDO_ESTADO_CERRADO){
+		            removePedido(cambio.idPed, tarea);
+		        }
+		    }
 		    //si hay cambios pendientes, se envían
 		    enviarCambios();
 		    //se actualiza la tarea con el ultimo cambio
@@ -635,16 +647,20 @@ function setPedidoEnCurso(id){
  * Borra un pedido de la tarea del repartidor
  * @param id Id del pedido a borrar
  */
-function removePedido(id){
-    
-    tarea = getTarea();
-    if (tarea == undefined)
-        return;
+function removePedido(id, tarea){
+    guardarTarea = false;
+    if (tarea == undefined){
+        guardarTarea = true;
+        tarea = getTarea();
+        if (tarea == undefined)
+            return;
+    }
     pos = getPosicionPedidoPorId(id, tarea);
     if (pos == -1)
         return;
     tarea.pedidos.splice(pos, 1);
-    setTarea(tarea);
+    if (guardarTarea)
+        setTarea(tarea);
 }
 /**
 Realiza una petición para actualizar el estado de un pedido.
@@ -802,7 +818,7 @@ function actualizaFuncionalidadMenu(){
 }
 function actualizaNotificacionRed(){
 	//on off line
-	if (hayRed){
+	if (hayRed == true){
 		$j('#top-panel').addClass('online');
 		$j('#hayRed').html('<i class="fa fa-refresh fa-spin ok"></i>');
 	}else{
@@ -1092,6 +1108,7 @@ POSICIONAMIENTO
 function geoOK(position){
 	//console.log("GEO: "+position.coords.latitude+','+position.coords.longitude);
 	hayGeo = true;
+	window.localStorage.setItem(HAY_GEO, hayGeo);
 	latitud = position.coords.latitude;
 	longitud = position.coords.longitude;
 	data = {'latitud':latitud,'longitud':longitud};
@@ -1123,8 +1140,9 @@ function geoError(error){
 			mensaje="Se ha producido un error desconocido."
 			break;
 	}
-	console.log("Problemas de posicionamiento: "+mensaje);
+	console.log("Problemas de posicionamiento: "+mensaje);	
 	hayGeo = false;
+	window.localStorage.setItem(HAY_GEO, hayGeo);
 }
 function posicionate(){
 	navigator.geolocation.getCurrentPosition(geoOK, geoError);
