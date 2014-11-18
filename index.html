@@ -59,7 +59,7 @@
 	        document.addEventListener("deviceready", onDeviceReady, false);
 			function onDeviceReady() {
 				checkConnection();
-				$j(".ui-loader").hide();
+				inicializacionEntorno();
 		    }
 			document.addEventListener("backbutton", onBackKeyDown, false);
 			function onBackKeyDown() {
@@ -80,16 +80,13 @@
 						<div class="content">
 							<div class="content-strip">
 								<h4>Aloha24</h4>
-								<p>Introduce tus credenciales para acceder al sistema.</p>
-								<i class="fa fa-cogs"></i>
 								<div class="overlay"></div>
 								<div class="logo">
 									<img alt="img" src="images/logo-aloha.png">			
 								</div>
 							</div>
-							<div class="decoration"></div>
 							<div class="container no-bottom">
-								<h4>Aloha24</h4>
+								<p>Introduce tus credenciales para acceder al sistema.</p>
 								<!--<form class="contactForm">-->
 									<fieldset>
 										<div class="formValidationError" id="contactNameFieldError">
@@ -105,8 +102,8 @@
 											<label class="field-title contactNameField" for="password">Usuario:</label>
 											<input type="password"  name="password" id="password"  class="contactField requiredField" value="" placeholder="Password" onClick="login();"/>
 										</div>
-										<div class="formSubmitButtonErrorsWrap">
-											<button class="buttonWrap button button-green contactSubmitButton" id="btnLogin" onClick="login();">Acceder</button>
+										<div class="formSubmitButtonErrors">
+											<button class="button button-orange contactSubmitButton" id="btnLogin" onClick="login();">Acceder</button>
 										</div>
 									</fieldset>
 								<!--</form>-->

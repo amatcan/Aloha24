@@ -168,11 +168,11 @@
 				if (negocio != null){
 					//Actualiza el menu del negocio
 					borraHtml('MENU_NG_'+pedido.id+'_'+negocio.id);
-					html = getHtmlMenuNegocio(pedido.id, negocio);
+					html = getHtmlMenuNegocio(pedido.id, negocio)
 					$j('#MENU_NG_'+pedido.id+'_'+negocio.id).html(html);
 					
 					borraHtml('ICO_NG_'+pedido.id+'_'+negocio.id);
-					html = getHtmlIconoNegocio(negocio);
+					html = getHtmlIconoNegocio(pedido.id, negocio);
 					$j('#ICO_NG_'+pedido.id+'_'+negocio.id).html(html);
 					
 					//Si hay más negocios y este está ya recogido, se actualiza el menú del siguiente
@@ -180,8 +180,12 @@
 						negocio = pedido.negocios[posicion+1];
 						//se pone en ruta
 						borraHtml('MENU_NG_'+pedido.id+'_'+negocio.id);
-						html = getHtmlMenuNegocio(pedido.id, negocio);
+						html = getHtmlMenuNegocio(pedido.id, negocio);						
 						$j('#MENU_NG_'+pedido.id+'_'+negocio.id).html(html);
+						
+						borraHtml('ICO_NG_'+pedido.id+'_'+negocio.id);
+						html = getHtmlIconoNegocio(pedido.id, negocio);
+						$j('#ICO_NG_'+pedido.id+'_'+negocio.id).html(html);
 					}
 					//si no hay más negocios se actualiza la confirmación de entrega
 					if (posicion+1==pedido.negocios.length){
@@ -215,12 +219,12 @@
 					}
 					html += '<ul class="negocio" id="NEG_'+pedido.pedido.id+'_'+negocio.id+'">';
 					html += '<li class="icono" id="ICO_NG_'+pedido.pedido.id+'_'+negocio.id+'">';
-					html += getHtmlIconoNegocio(negocio);
+					html += getHtmlIconoNegocio(pedido.pedido.id, negocio);
 					html +='</li>';
 					html += '<li class="detalle">'+negocio.nombre+'</li>';
 					html += '<li class="menu" id="MENU_NG_'+pedido.pedido.id+'_'+negocio.id+'">';
 					html += getHtmlMenuNegocio(idPedido, negocio, menuHabilitado)+'</li>';
-					html += '<li class="mapa"><a class="boton boton-mapa button-blue" id="MAPA_'+pedido.pedido.id+'_'+negocio.id+'"><i class="fa fa-globe"></i> </a></li>';
+					html += '<li class="mapa"><a class="boton boton-mapa button-blue" id="MAPA_'+pedido.pedido.id+'_'+negocio.id+'" onClick="verNegocio('+pedido.pedido.id+','+negocio.id+');"><i class="fa fa-globe"></i> </a></li>';
 					html += '</ul>';
 					/*
 					html += '<tr>';
@@ -236,7 +240,9 @@
 				$j('#negocios').html(html);
 			}
 
-
+			function verNegocio(idPed, idNeg){
+				window.location = PAGE_MAPA + '?' + PAR_PEDIDO_ID + '=' + idPed + '&'+PAR_NEGOCIO_ID + '=' + idNeg;
+			}
 			/**
 			Obtiene el html para pintar el menu para la gestión de un negocio de un pedido. 
 			@param idPedido Identificador del pedido
@@ -247,9 +253,11 @@
 				html_menu = '';
 				if (habilitado != undefined && !habilitado){
 					if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO)
-						html_menu = '<a class="boton boton-accion no-activo button-green" title="El paquete ya se recogió."><i class="fa fa-check"></i> Ya recogido</a>';						
+						html_menu = '<span class="solo-info">Recogido</span>';
+						//html_menu = '<a class="boton boton-accion no-activo button-green" title="El paquete ya se recogió."><i class="fa fa-check"></i> Ya recogido</a>';						
 					else
-						html_menu = '<a class="boton boton-accion no-activo  button-red" title="Este negocio está pendiente de ir a recoger el paquete."><i class="fa fa-times"></i> Pendiente</a>';						
+						//html_menu = '<a class="boton boton-accion no-activo  button-red" title="Este negocio está pendiente de ir a recoger el paquete."><i class="fa fa-times"></i> Pendiente</a>';
+						html_menu = '<span class="solo-info">Pendiente</span>';
 					return html_menu;
 				}
 				disabled = false;
@@ -259,13 +267,14 @@
 				}
 								
 				if (disabled)
-					html_menu += '<a class="boton boton-accion no-activo  button-green" disabled="disabled" title="Recogido"><i class="fa fa-check"></i> </a>';
+					html_menu += '<span class="solo-info">Recogido</span>';
+					//html_menu += '<a class="boton boton-accion no-activo  button-green" disabled="disabled" title="Confirmar recogida">Recogido</a>';//<i class="fa fa-check"></i>
 				else{					
 					if (negocio.estado == undefined || negocio.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO || negocio.estado == SIN_ESTADO){
-						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_ESPERANDO+');" class="boton boton-accion button-yellow" title="Acabo de llegar al negocio y espero que me den el paquete."><i class="fa fa-clock-o"></i>Acabo de llegar</a>';	
+						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_ESPERANDO+');" class="boton boton-accion button-yellow" title="Acabo de llegar al negocio y espero que me den el paquete.">Llegada</a>';//<i class="fa fa-clock-o"></i>
 					}
 					if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_ESPERANDO){
-						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_RECOGIDO+');" class="boton boton-accion button-orange" title="Acabo de recoger el paquete y continuo con el pedido."><i class="fa fa-truck"></i></a>';
+						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_RECOGIDO+');" class="boton boton-accion button-orange" title="Acabo de recoger el paquete y continuo con el pedido.">Recogido</a>';//<i class="fa fa-truck"></i>
 					}
 					
 				}

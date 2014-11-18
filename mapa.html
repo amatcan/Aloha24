@@ -111,6 +111,11 @@
 												
 					}else{
 						//se `pinta el negocio.
+						negocio = getNegocioPorId(idPedido, idNegocio);
+						posicion = coordenadas2JSON(negocio.coordenadas);
+						initializeMapa(posicion, negocio.direccion);
+						$j('#entradilla').html('Localización de ' + negocio.nombre);
+						pintaNegocio(negocio);
 					}
 				}
 			}
@@ -119,6 +124,12 @@
 				html = '<p class="nombre">'+cliente.nombre+'</p>';
 				html += '<p class="direccion">'+cliente.direccion+'</p>';
 				html += '<p class="telefono"><a href="tel:'+cliente.telefono+'"><i class="fa fa-phone"> </i> '+cliente.telefono+'</a></p>';
+				$j('#info').html(html);
+			}
+			function pintaNegocio(negocio){
+				html = '<p class="nombre">'+negocio.nombre+'</p>';
+				html += '<p class="direccion">'+negocio.direccion+'</p>';
+				html += '<p class="telefono"><a href="tel:'+negocio.telefono+'"><i class="fa fa-phone"> </i> '+negocio.telefono+'</a></p>';
 				$j('#info').html(html);
 			}
 			/**
@@ -142,7 +153,7 @@
 	</head>
 	<body class="mi-body" onload="onDeviceReady();">
 		<div class="mi-header">
-			<span class="atras" onClick="window.history.back();"><i class="fa fa-chevron-left"></i>ATR&Aacute;S</span>
+			<span class="atras" onClick="window.history.back();"><i class="fa fa-chevron-left"></i> </span>
 		</div>
 		<div class="mi-contenedor">
 			<div id="entradilla" class="entradilla">

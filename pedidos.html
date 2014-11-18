@@ -138,8 +138,8 @@
 		    } 
 			function reinicioPedidos(){
 				token = getToken();
-				c = {"token":token,"cambios":[{"idPed": 1,"est": 2,"idNeg": -1,"ts": 1415877437},{"idPed": 2,"est": 2,"idNeg": -1,"ts": 1415877780}]};
-				json = fpost(URL_SUBIR_CAMBIOS, c);
+				c = {"token":token};
+				json = fpost(URL_INIT, c);
 				return true;
 			}
 		</script>  

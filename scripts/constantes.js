@@ -1,17 +1,11 @@
 /********************************************************+
 RESTFULL
 ********************************************************/
-/***LOCAL***/
-//const URL_LOGIN = "http://localhost/AlohaMov/login.php";
-//const URL_LOGIN = "http://localhost/AlohaMov/login2.php";
-//const URL_PEDIDO_GESTION = "http://localhost/AlohaMov/gespedido.php";
-//const URL_SUBIR_CAMBIOS = "http://localhost/AlohaMov/setEstadosPedidos.php";
-//const URL_GEO = "http://localhost/AlohaMov/login.php";
-/***REMOTO***/
 const URL_LOGIN = "http://aloha24.com/alohages/ws/ws_getAuth.php";
 const URL_PEDIDO_GESTION = "http://aloha24.com/alohages/ws/ws_setPedido.php";
 const URL_SUBIR_CAMBIOS = "http://aloha24.com/alohages/ws/ws_setEstadosPedidos.php";
 const URL_GEO = "http://aloha24.com/alohages/ws/ws_setCoord.php";
+const URL_INIT = "http://aloha24.com/alohages/ws/ws_setInit.php";
 /*
 const URL_RESUMEN = "http://neexteam.esy.es/inicio.php";
 const URL_PEDIDOS = "http://neexteam.esy.es/inicio.php";

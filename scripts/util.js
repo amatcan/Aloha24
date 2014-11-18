@@ -15,6 +15,7 @@ Inicializa el entorno de ejecución de la aplicación. Sin la llamada a esta funci
 incoherentes en la ejecución de la aplicación.
 */
 function inicializacionEntorno(){
+    check();
 	onLine = window.localStorage.getItem(ONLINE)==undefined?true:window.localStorage.getItem(ONLINE);
 	hayRed = window.localStorage.getItem(HAY_RED)==undefined?checkConnection():window.localStorage.getItem(HAY_RED);
 	hayGeo = window.localStorage.getItem(HAY_GEO)==undefined?false:window.localStorage.getItem(HAY_GEO);
@@ -869,20 +870,49 @@ NEGOCIOS
 *************************************************************/
 /**
 Obtiene el html que pintara el icono del negocio.
+@param idPed Id del Pedido
 @param negocio Negocio del que pintar el icono
 @retult html del icono del negocio
 */
-function getHtmlIconoNegocio(negocio){
+function getHtmlIconoNegocio(idPed, negocio){
+    tarea = getTarea();
+    if (tarea == undefined)
+        return '';
+    pedido = getPedidoPorId(idPedido); 
+    pos = getPosicionNegocioPorId(pedido.pedido.id, negocio.id);
 	html_ico = '';
+	//si está en transito hacia el primer negocio (porque viene sin estado)
+	if (pedido.pedido.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO && pos == 0)
+	    html_ico = '<i class="fa fa-location-arrow est-negocio est-negocio-transito"></i>';
+	if (pedido.pedido.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO && pos > 0)
+        html_ico = '<i class="fa fa-exclamation est-negocio est-negocio-pendiente"></i>';
+	//si está en transito al negocio
+	if(negocio.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO)
+	    html_ico = '<i class="fa fa-location-arrow est-negocio est-negocio-transito"></i>';
+	//si se está esperando
+    if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_ESPERANDO)
+        html_ico = '<i class="fa fa-clock-o est-negocio est-negocio-esperando"></i>';
+	//si el negocio está recogido
 	if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO)
-		html_ico += '<i class="fa fa-check-square-o est-negocio est-negocio-recogido"></i>';
-	if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_ESPERANDO)
-		html_ico += '<i class="fa fa-clock-o est-negocio est-negocio-esperando"></i>';
-	if (negocio.estado == undefined || negocio.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO || negocio.estado == SIN_ESTADO)
-		html_ico += '<i class="fa fa-exclamation est-negocio est-negocio-sin"></i>';
+		html_ico = '<i class="fa fa-check-square-o est-negocio est-negocio-recogido"></i>';
+		
 	if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_ANULADO)
-		html_ico += '<i class="fa fa-ban est-negocio"></i>';
+		html_ico = '<i class="fa fa-ban est-negocio"></i>';
 	return html_ico;
+}
+
+/**
+ * Localiza la posicion de un negocio en la tarea por su id
+ * @param id del negocio
+ * @return posicion del negocio en el pedido, -1 si no lo encuentra
+ */
+function getPosicionNegocioPorId(idPedido, idNegocio){
+    pedido = getPedidoPorId(idPedido);
+    for(i=0;i<pedido.pedido.negocios.length;i++){
+        if (pedido.pedido.negocios[i].id == idNegocio)
+            return i;
+    }
+    return -1;
 }
 /**
 Actualiza el estado de un negocio que aparece en la ruta de un pedido.
@@ -992,47 +1022,31 @@ function setEstadoNegocio(idPedido, idNegocio, estado, f, fe, token){
         actualizaHtmlNegocioPorPosicion(pedido, posNegocio);        
         setTareaTS();
 	    
-		/*tarea = getTarea();				
-		if (tarea != undefined){
-			ts = getTS();		
-			pos = getPosicionPedidoPorId(idPedido, tarea);
-			nNegocios = tarea.pedidos[pos].pedido.negocios.length;
-			posNegocio = -1
-			for(i=0;i < nNegocios;i++){
-				if (tarea.pedidos[pos].pedido.negocios[i].id == idNegocio){
-					tarea.pedidos[pos].pedido.negocios[i].estado = estado;
-					if (estado == PEDIDO_NEGOCIO_ESTADO_RECOGIDO){
-						//si hay que ir a otro negocio, se indica que se está en ruta hacia él
-						if ((i+1) < nNegocios){
-							tarea.pedidos[pos].pedido.negocios[i+1].estado = PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO;
-							//Se está en transito hacia el siguiente negocio
-							addCambio(idPedido, PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO, tarea.pedidos[pos].pedido.negocios[i+1].id, ts);
-						}else{
-							//Si no hay más negocios, se cierra el paquete y se dirige al cliente
-							tarea.pedidos[pos].pedido.empaquetado = PEDIDO_PAQUETE_COMPLETO;
-							tarea.pedidos[pos].pedido.negocios[i].estado = PEDIDO_NEGOCIO_ESTADO_RECOGIDO;
-							tarea.pedidos[pos].pedido.estado = PEDIDO_ESTADO_EN_ENTREGA;
-							//Se está en transito hacia el cliente
-                            addCambio(idPedido, PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO, ID_CLIENTE, ts);
-						}
-					}else{
-					    //si se ha llegado al negocio
-					     if (estado == PEDIDO_NEGOCIO_ESTADO_ESPERANDO){
-					         tarea.pedidos[pos].pedido.negocios[i].estado = PEDIDO_NEGOCIO_ESTADO_ESPERANDO;
-					         addCambio(idPedido, PEDIDO_NEGOCIO_ESTADO_ESPERANDO, idNegocio, ts);
-					     }
-					}
-					setTareaTS(tarea, ts);
-					setTarea(tarea);
-					actualizaHtmlNegocioPorPosicion(tarea.pedidos[pos].pedido, i);
-					posNegocio = i;
-					break;
-				}
-			}
-		}*/
 	}
 }
 
+/**
+ * Obtiene un determinado negocio desde un pedido por su id
+ * @param idPed id del pedido
+ * @param idNeg id del negocio
+ * @param tarea Tarea del repartidor, es opcional
+ * @return negocio del pedido, null si no existe
+ */
+function getNegocioPorId(idPed, idNeg, tarea){
+    if (tarea == undefined){
+        tarea = getTarea();
+        if (tarea == undefined)
+            return null;
+    }
+    pedido = getPedidoPorId(idPed, tarea);
+    if (pedido == undefined || pedido == null)
+        return null;
+    for(i=0;i<pedido.pedido.negocios.length;i++){
+        if (pedido.pedido.negocios[i].id == idNeg)
+            return pedido.pedido.negocios[i];
+    }
+    return null;
+}
 /**
  * Obtiene el negocio actual de una tarea
  * @param tarea
@@ -1111,14 +1125,14 @@ function geoOK(position){
 	window.localStorage.setItem(HAY_GEO, hayGeo);
 	latitud = position.coords.latitude;
 	longitud = position.coords.longitude;
-	data = {'latitud':latitud,'longitud':longitud};
+	data = {'lat':latitud,'long':longitud};
 	setPosicion(data);
 	
 	if (hayRed){
 	    token = getToken();
-	    if (token == undefined){
+	    if (token != undefined){
 	        data.token = token;
-	        fpost(URL_GEO, data);
+	        json = fpost(URL_GEO, data);
 	    }
 	}
 	
