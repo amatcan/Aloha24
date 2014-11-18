@@ -31,7 +31,7 @@
 		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
 		<script type="text/javascript" src="scripts/framework.plugins.js"></script>
 		<script type="text/javascript" src="scripts/custom.js"></script>
-		<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>
+		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
 		<script type="text/javascript" src="scripts/constantes.js"></script>
 		<script type="text/javascript" src="scripts/util.js"></script>
 		<script type="text/javascript" src="scripts/md5.js"></script>
@@ -75,32 +75,32 @@
 				//mientras no estén visitados todos los negocios, no se puede interaccionar con los botones
 				if (pedido.empaquetado == PEDIDO_PAQUETE_COMPLETO){
 					if (pedido.estado == PEDIDO_ESTADO_EN_ENTREGA){
-						estilo1 = 'button-red';
-						estilo2 = 'button-grey';
+						estilo1 = 'button-green';
+						estilo2 = 'oculto';
 						disable1 = false;
 						disable2 = true;
 					}
 					else{
 						if (pedido.estado == PEDIDO_ESTADO_ENTREGANDO){
-							estilo1 = 'button-green';
-							estilo2 = 'button-red';
+							estilo1 = 'oculto';
+							estilo2 = 'button-green';
 							disable1 = true;
 							disable2 = false;
 						}else{
-							estilo1 = 'button-grey';
-							estilo2 = 'button-grey';
+							estilo1 = 'oculto';
+							estilo2 = 'oculto';
 						}
 					}
 				}else{
-					estilo1 = 'button-grey';
-					estilo2 = 'button-grey';
+					estilo1 = 'oculto';
+					estilo2 = 'oculto';
 				}
 				html = '<a id="alcanzado" class="button '+estilo1+'" ';
 				if (disable1)
 					html += 'disabled="disabled" ';
 				else
 					html += 'href="#" onClick="confirmaLlegadaAlCliente('+pedido.id+');"';
-				html +='>En cliente</a>';
+				html +='>Esperando al cliente</a>';
 				$j('#enCliente').html(html);
 				
 				html = '<a id="alcanzado" class="button '+estilo2+'" ';
@@ -108,7 +108,7 @@
 					html += 'disabled="disabled" ';
 				else
 					html += 'href="#" onClick="confirmaEntregaPedido('+pedido.id+');"';
-				html +='>Entregado</a>';
+				html +='>Pedido entregado</a>';
 				$j('#confirmacion').html(html);
 			}
 			/**
@@ -367,8 +367,8 @@
 									}
 								</script>
 								<a  onClick="machaca();">Enviar cambios</a>-->
-								<div id="comentario" class="caja-texto" role="alert">
-								</div>
+								<section id="comentario" class="caja-texto contenedor" role="alert">
+								</section>
 							</div>
 							<div class="decoration"></div>
 							<div class="container no-bottom">

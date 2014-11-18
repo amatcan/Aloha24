@@ -31,19 +31,23 @@
 
 		<script type="text/javascript" src="scripts/jquery.js"></script>
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&language=es"></script>
-		<!--<script type="text/javascript" src="scripts/jqueryui.js"></script>
-		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
-		<script type="text/javascript" src="scripts/framework.plugins.js"></script>		
+		<!--<script type="text/javascript" src="scripts/jqueryui.js"></script>-->
+		<!--<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>-->
+		<!--<script type="text/javascript" src="scripts/framework.plugins.js"></script>		
 		<script type="text/javascript" src="scripts/custom.js"></script>-->
 		
-		<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>
+		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<!--
+		
+		<script type="text/javascript" src="scripts/md5.js"></script>-->
 		<script type="text/javascript" src="scripts/constantes.js"></script>
 		<script type="text/javascript" src="scripts/util.js"></script>
-		<script type="text/javascript" src="scripts/md5.js"></script>
 		
 
 		<script type="text/javascript" charset="utf-8">
 			var map;
+			var directionsDisplay;
+			var directionsService = new google.maps.DirectionsService();
 			/**
 			Pinta el mapa centrado en un punto
 			@param posicion Centro del mapa
@@ -57,26 +61,30 @@
 					mapTypeId: google.maps.MapTypeId.ROADMAP
 				};
 				map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
-				posicion = getPosicion();
-				var bounds = new google.maps.LatLngBounds ();
-				bounds.extend(latlon);
-				if (posicion != undefined && posicion.latitud != undefined){
-					bounds.extend(new google.maps.LatLng(posicion.latitud, posicion.longitud)); 
-					var usted = new google.maps.Marker({
-						position: new google.maps.LatLng(posicion.latitud, posicion.longitud),
-						map: map,
-						title: 'Usted está aquí.',
-						icon:'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-						animation: google.maps.Animation.DROP,
-					});
-				}
 				var marker = new google.maps.Marker({
 					position: latlon,
 					map: map,
 					title: titulo != undefined?titulo:'',
 					icon:'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
 				});
+				
+				posicion = getPosicion();
+				
+				var bounds = new google.maps.LatLngBounds ();
+				bounds.extend(latlon);
+				if (posicion != undefined && posicion.lat != undefined){
+					bounds.extend(new google.maps.LatLng(posicion.lat, posicion.long)); 
+					var usted = new google.maps.Marker({
+						position: new google.maps.LatLng(posicion.lat, posicion.long),
+						map: map,
+						title: 'Usted está aquí.',
+						icon:'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+						animation: google.maps.Animation.DROP,
+					});
+				}
+				
 				map.fitBounds(bounds);
+				
 			}
 			/**
 			Convierte las coordenadas en un string en un JSON.
@@ -105,7 +113,7 @@
 					if (idNegocio == null){
 						pedido = getPedidoPorId(idPedido);
 						posicion = coordenadas2JSON(pedido.cliente.coordenadas);
-						initializeMapa(posicion, pedido.cliente.direccion);
+						initializeMapa(posicion, pedido.cliente.direccion);						
 						$j('#entradilla').html('Direcci&oacute;n de entrega del pedido.');
 						pintaCliente(pedido.cliente);
 												
@@ -114,12 +122,27 @@
 						negocio = getNegocioPorId(idPedido, idNegocio);
 						posicion = coordenadas2JSON(negocio.coordenadas);
 						initializeMapa(posicion, negocio.direccion);
+						//pintaRutaAlNegocio(negocio);
 						$j('#entradilla').html('Localización de ' + negocio.nombre);
 						pintaNegocio(negocio);
 					}
 				}
 			}
-			
+			function pintaRutaAlNegocio(negocio){
+				posicion = getPosicion();
+				address = new google.maps.LatLng(posicion.lat,posicion.long);
+				coordenadas = coordenadas2JSON(negocio.coordenadas);
+				destino = new google.maps.LatLng(coordenadas.lat, coordenadas.long);
+				
+				
+			}
+			function pintaNegocios(pedido){
+				pedido = getPedidoPorId(idPedido);
+				negocios = pedido.pedido.negocios;
+				for(i=0;i<negocios.length;i++){
+					
+				}
+			}
 			function pintaCliente(cliente){
 				html = '<p class="nombre">'+cliente.nombre+'</p>';
 				html += '<p class="direccion">'+cliente.direccion+'</p>';

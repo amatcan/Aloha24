@@ -15,11 +15,12 @@ Inicializa el entorno de ejecución de la aplicación. Sin la llamada a esta funci
 incoherentes en la ejecución de la aplicación.
 */
 function inicializacionEntorno(){
-    check();
+    
 	onLine = window.localStorage.getItem(ONLINE)==undefined?true:window.localStorage.getItem(ONLINE);
 	hayRed = window.localStorage.getItem(HAY_RED)==undefined?checkConnection():window.localStorage.getItem(HAY_RED);
 	hayGeo = window.localStorage.getItem(HAY_GEO)==undefined?false:window.localStorage.getItem(HAY_GEO);
 	$j(".ui-loader").attr('style','display:none');
+	check();
 	inicializaPosicionamiento();
 	setInterval(check, POOL_TIMEOUT);
 }
@@ -1121,7 +1122,6 @@ POSICIONAMIENTO
 *************************************************************/
 function geoOK(position){
 	//console.log("GEO: "+position.coords.latitude+','+position.coords.longitude);
-	hayGeo = true;
 	window.localStorage.setItem(HAY_GEO, hayGeo);
 	latitud = position.coords.latitude;
 	longitud = position.coords.longitude;
