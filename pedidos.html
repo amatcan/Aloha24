@@ -68,6 +68,7 @@
 			@param pedidos Pedidos a pintar.
 			*/
 			function pintaPedidos(pedidos){
+				pedidosPintados = 0;
 				if (pedidos.length > 0){
 					$j('#pedidos').html('');
 					for(i=0;i<pedidos.length;i++){
@@ -84,8 +85,12 @@
 								funcionalidad = 'onClick = "return confirmarPuestaPedidoEnCurso('+pedidos[i].pedido.id+');"';
 						}
 						html = pintaPedido(pedidos[i], i+1, funcionalidad);
+						pedidosPintados++;
 						$j('#pedidos').append(html);
 					}				
+				}
+				if(pedidosPintados == 0){
+					$j('#pedidos').html('<div class="static-notification-yellow"><p class="center-text uppercase">No hay pedidos asignados.</p></div>');
 				}
 		    }
 			
@@ -171,7 +176,7 @@
 							</a>
 						</div>
 						<div class="nav-item">
-							<a id="closeMenu" href="#">
+							<a id="closeMenu" href="#" onClick="exitApp();">
 								<i class="nav-icon fa fa-times"></i>
 								On/Off
 							</a>
@@ -187,8 +192,7 @@
 				<div class="perspective_container"><!--the "moving to the left" content box-->
 					<div class="wrapper"><!-- wrapper needed for scroll -->
 						<div class="header-clear"><i class="fa fa-times"></i></div>
-						<div class="decoration"></div>
-						
+						<div class="decoration"></div>						
 						<div class="content">
 							<div class="container no-bottom">
 								<h3>Pedidos</h3>

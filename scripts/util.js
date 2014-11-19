@@ -3,10 +3,11 @@ var watchId;
 var onLine;
 var hayRed = false;
 var hayGeo = false;
+var monitorizarRepartidor = true;
 var $j = jQuery.noConflict();
 
 //jQuery.mobile.ajaxEnabled=false;
-//jQuery.mobile.loadingMessage=false;
+jQuery.mobile.loadingMessage=false;
 /*************************************************************
 UTILERIA
 *************************************************************/
@@ -101,8 +102,7 @@ function getImagenPago(modo){
 Cierre de la aplicación
 */
 function exitApp(){
-	console.log("Finalizando aplicación....");
-	if (confirm("Va a cerrar la aplicación.")){
+	if (confirm("Va a cerrar la aplicacion.")){
 		if (navigator.app){
 		   navigator.app.exitApp();
 		}
@@ -1162,6 +1162,7 @@ function posicionate(){
 	navigator.geolocation.getCurrentPosition(geoOK, geoError);
 }
 function inicializaPosicionamiento(){
-	watchId = navigator.geolocation.watchPosition(geoOK, geoError, { maximumAge: GEO_CACHE, timeout: GEO_TIMEOUT });
+    if (monitorizarRepartidor)
+        watchId = navigator.geolocation.watchPosition(geoOK, geoError, { maximumAge: GEO_CACHE, timeout: GEO_TIMEOUT });
 	//posicionate();
 }

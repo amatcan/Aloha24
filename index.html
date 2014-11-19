@@ -50,14 +50,17 @@
 				url = URL_LOGIN;
 				console.log(data);
 				//json = fget(url);
-				json = fpost(url, data);
-				//window.localStorage.setItem(USERNAME, $j('#username').val());
-				checkLogin(json);
+				if (hayRed){
+					json = fpost(url, data);				
+					checkLogin(json);
+				}
 				return false;
 			}
 
 	        document.addEventListener("deviceready", onDeviceReady, false);
 			function onDeviceReady() {
+				//Este interface no monitoriza al repartidor
+				monitorizarRepartidor = false;
 				checkConnection();
 				inicializacionEntorno();
 		    }

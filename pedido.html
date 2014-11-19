@@ -36,10 +36,6 @@
 		<script type="text/javascript" src="scripts/util.js"></script>
 		<script type="text/javascript" src="scripts/md5.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			console.log("Empezamos...");
-			var latitud = 0;
-		    var longitud = 0;
-			
 			
 			function updateInterface(){				
 		    	usuario = window.localStorage.getItem("username");
@@ -68,8 +64,6 @@
 				pintaBotonConfirmacion(pedido.pedido);
 			}
 			function pintaBotonConfirmacion(pedido){				
-				disable1 = true;
-				disable2 = true;
 				estilo1 = '';
 				estilo2 = '';
 				//mientras no estén visitados todos los negocios, no se puede interaccionar con los botones
@@ -77,15 +71,11 @@
 					if (pedido.estado == PEDIDO_ESTADO_EN_ENTREGA){
 						estilo1 = 'button-orange';
 						estilo2 = 'oculto';
-						disable1 = false;
-						disable2 = true;
 					}
 					else{
 						if (pedido.estado == PEDIDO_ESTADO_ENTREGANDO){
 							estilo1 = 'oculto';
 							estilo2 = 'button-orange';
-							disable1 = true;
-							disable2 = false;
 						}else{
 							estilo1 = 'oculto';
 							estilo2 = 'oculto';
@@ -95,21 +85,15 @@
 					estilo1 = 'oculto';
 					estilo2 = 'oculto';
 				}
-				html = '<a id="alcanzado" class="button '+estilo1+'" ';
-				if (disable1)
-					html += 'disabled="disabled" ';
-				else
-					html += 'href="#" onClick="confirmaLlegadaAlCliente('+pedido.id+');"';
-				html +='>En cliente</a>';
+				html = '<a id="encliente" class="button '+estilo1+'" href="#" onClick="confirmaLlegadaAlCliente('+pedido.id+');">En cliente</a>';
 				$j('#enCliente').html(html);
+				$j('#enCliente').trigger('create');
 				
-				html = '<a id="alcanzado" class="button '+estilo2+'" ';
-				if (disable2)
-					html += 'disabled="disabled" ';
-				else
-					html += 'href="#" onClick="confirmaEntregaPedido('+pedido.id+');"';
-				html +='>Pedido entregado</a>';
+				html = '<a id="entregado" class="button '+estilo2+'" href="#" onClick="confirmaEntregaPedido('+pedido.id+');">Pedido entregado</a>';
 				$j('#confirmacion').html(html);
+				$j('#confirmacion').trigger('create');
+				
+				$j('#botonesCliente').trigger('create');
 			}
 			/**
 			Función para confirmar que el repartido ha llegado al cliente, pero no ha entregado el pedido aún.
@@ -141,8 +125,12 @@
 					code = setPedidoEntregado(id);
 					if (code == RETURN_CODE_OK || code == RETURN_CODE_OK_SIN_RED){
 						//Se actualiza el boton	
-						pedido = getPedidoPorId(id, tarea);
+						/*pedido = getPedidoPorId(id, tarea);
 						pintaBotonConfirmacion(pedido.pedido);
+						*/
+						//Borra el pedido y redirige a la lista de pedidos
+						removePedido(id);
+						window.location = PAGE_PEDIDOS;
 					}else
 						if (code == RETURN_CODE_UPDATE){
 							//se actualizaría el interface completo
@@ -190,7 +178,9 @@
 					//si no hay más negocios se actualiza la confirmación de entrega
 					if (posicion+1==pedido.negocios.length){
 						pintaBotonConfirmacion(pedido);
+						$j('#confirmacion').trigger('refresh');
 					}
+					$j('#negocios').trigger('refresh');
 				}
 			}
 			/**
@@ -229,6 +219,7 @@
 
 				}
 				$j('#negocios').html(html);
+				$j('#negocios').trigger('refresh');
 			}
 
 			function verNegocio(idPed, idNeg){
@@ -330,7 +321,7 @@
 							</a>
 						</div>
 						<div class="nav-item">
-							<a id="closeMenu" href="#">
+							<a id="closeMenu" href="#" onClick="exitApp();">
 								<i class="nav-icon fa fa-times"></i>
 								On/Off
 							</a>
@@ -364,7 +355,7 @@
 							<div class="decoration"></div>
 							<div class="container no-bottom">
 								<h3>Datos de entrega</h3>
-								<section class="contenedor">
+								<section class="contenedor" id="botonesCliente">
 									<section id="entrega" class="caja-mitad">
 									</section>
 									<section class="caja-mitad dcha" id="pago">
