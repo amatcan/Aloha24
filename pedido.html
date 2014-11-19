@@ -75,7 +75,7 @@
 				//mientras no estén visitados todos los negocios, no se puede interaccionar con los botones
 				if (pedido.empaquetado == PEDIDO_PAQUETE_COMPLETO){
 					if (pedido.estado == PEDIDO_ESTADO_EN_ENTREGA){
-						estilo1 = 'button-green';
+						estilo1 = 'button-orange';
 						estilo2 = 'oculto';
 						disable1 = false;
 						disable2 = true;
@@ -83,7 +83,7 @@
 					else{
 						if (pedido.estado == PEDIDO_ESTADO_ENTREGANDO){
 							estilo1 = 'oculto';
-							estilo2 = 'button-green';
+							estilo2 = 'button-orange';
 							disable1 = true;
 							disable2 = false;
 						}else{
@@ -100,7 +100,7 @@
 					html += 'disabled="disabled" ';
 				else
 					html += 'href="#" onClick="confirmaLlegadaAlCliente('+pedido.id+');"';
-				html +='>Esperando al cliente</a>';
+				html +='>En cliente</a>';
 				$j('#enCliente').html(html);
 				
 				html = '<a id="alcanzado" class="button '+estilo2+'" ';
@@ -226,16 +226,7 @@
 					html += getHtmlMenuNegocio(idPedido, negocio, menuHabilitado)+'</li>';
 					html += '<li class="mapa"><a class="boton boton-mapa button-blue" id="MAPA_'+pedido.pedido.id+'_'+negocio.id+'" onClick="verNegocio('+pedido.pedido.id+','+negocio.id+');"><i class="fa fa-globe"></i> </a></li>';
 					html += '</ul>';
-					/*
-					html += '<tr>';
-					html += '<td id="MENU_NG_'+pedido.pedido.id+'_'+negocio.id+'">';
-					html += getHtmlMenuNegocio(idPedido, negocio, menuHabilitado)+'</td>';
-					html += '<td id="ICO_NG_'+pedido.pedido.id+'_'+negocio.id+'">';
-					html += getHtmlIconoNegocio(negocio);
-					html +='</td>';
-					html += '<td><h5><a href="tel:'+negocio.telefono+'"><i class="fa fa-phone"> </i> '+negocio.nombre+'</a></h5><p><small>'+negocio.direccion+'</small></p></td>'
-					html += '</tr>';
-					*/
+
 				}
 				$j('#negocios').html(html);
 			}
@@ -271,7 +262,7 @@
 					//html_menu += '<a class="boton boton-accion no-activo  button-green" disabled="disabled" title="Confirmar recogida">Recogido</a>';//<i class="fa fa-check"></i>
 				else{					
 					if (negocio.estado == undefined || negocio.estado == PEDIDO_NEGOCIO_ESTADO_EN_TRANSITO || negocio.estado == SIN_ESTADO){
-						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_ESPERANDO+');" class="boton boton-accion button-yellow" title="Acabo de llegar al negocio y espero que me den el paquete.">Llegada</a>';//<i class="fa fa-clock-o"></i>
+						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_ESPERANDO+');" class="boton boton-accion button-orange" title="Acabo de llegar al negocio y espero que me den el paquete.">Llegada</a>';//<i class="fa fa-clock-o"></i>
 					}
 					if (negocio.estado == PEDIDO_NEGOCIO_ESTADO_ESPERANDO){
 						html_menu += '<a href="#" onClick="setEstadoNegocio('+idPedido+','+negocio.id+','+PEDIDO_NEGOCIO_ESTADO_RECOGIDO+');" class="boton boton-accion button-orange" title="Acabo de recoger el paquete y continuo con el pedido.">Recogido</a>';//<i class="fa fa-truck"></i>
