@@ -48,7 +48,7 @@
 					//Si no es el pedido en curso, no se puede editar
 					pedidoActual = getPedidoActual(tarea);
 					if (pedidoActual == null || pedidoActual.pedido.id != idPedido){
-						$j('#content').addClass('desabilitado');
+						$j('#contenido').addClass('desabilitado');
 						alert("No es el pedido que actualmente está gestionando, por lo que no podrá modifcar su información.");
 					}
 					pedido = getPedidoPorId(idPedido, tarea);
@@ -332,7 +332,7 @@
 					<div class="wrapper"><!-- wrapper needed for scroll -->
 						<div class="header-clear"><i class="fa fa-times"></i></div>
 						<div class="decoration"></div>
-						<div class="content">
+						<div class="content" id="contenido">
 							<div class="container no-bottom">
 								<h3>Negocios del pedido</h3>
 								<section id="negocios" class="contenedor">
