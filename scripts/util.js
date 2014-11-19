@@ -49,11 +49,6 @@ function checkConnection() {
 	    hayRed = true;
 	else
 	    hayRed = false;
-	/*console.log("NOOOO hay red.....");
-	contaconta++;
-	if (contaconta >0 && contaconta < 4){	    
-	    hayRed = false;
-	}*/
 	
 	window.localStorage.setItem(HAY_RED, hayRed);
 	return hayRed;
@@ -108,6 +103,8 @@ function exitApp(){
 		}
 		else if (navigator.device) {
 			navigator.device.exitApp();
+		}else{
+		    app.exitApp();
 		}
 	}
 }
@@ -259,7 +256,7 @@ function fpost(url, data, f, ferror){
 			async:false,
 			timeout: 30000,
 			cache:false,
-			data : {datos:JSON.stringify(data)}, 
+			data : data == undefined?{}:{datos:JSON.stringify(data)}, 
 			success: function(json){
 					console.log(json);
 					if (f != undefined && f != null)
@@ -290,9 +287,9 @@ function fget(url, f, ferror){
     console.log("GET:"+url);
 	resultado = {};
 	try{
-		jQuery.support.cors = true;
-		jQuery.ajaxSetup({ cache:false });
-		jQuery.mobile.allowCrossDomainPages = true;
+	    jQuery.support.cors = true;
+        jQuery.ajaxSetup({ cache:false });
+        jQuery.mobile.allowCrossDomainPages = true;
 		jQuery.ajax({
 			type: 'GET',
 			url: url,                   
@@ -319,6 +316,34 @@ function fget(url, f, ferror){
 		return resultado;
 	}
 }
+/**
+ * Obtiene el contenido de una url
+ * @param url
+ * @returns
+ */
+function getJSONFromUrl(url){                
+    jQuery.support.cors = true;
+    jQuery.ajaxSetup({ cache:false });
+    jQuery.mobile.allowCrossDomainPages = true;
+    $j.ajax({
+        type: 'GET',
+        url: url,                   
+        dataType: 'json',
+        async:false,
+        timeout: 30000,
+        cache:false,
+        success: function(json){
+            return json;
+        },
+        error:function(XMLHttpRequest, textStatus, errorThrown) {
+            alert('Error al consultar :: '+ typeof(XMLHttpRequest) + " :: " + XMLHttpRequest + " :: " +textStatus + " :: " + errorThrown);
+            result =  null;
+        }
+    });
+    return {};
+    
+}
+
 /**
 Función generica para mostrar un mensaje de petición enviada con éxito.
 @param msg Mensaje a  mostrar.
@@ -1125,7 +1150,7 @@ function geoOK(position){
 	window.localStorage.setItem(HAY_GEO, hayGeo);
 	latitud = position.coords.latitude;
 	longitud = position.coords.longitude;
-	data = {'lat':latitud,'long':longitud};
+	data = {'lat':latitud,'lng':longitud};
 	setPosicion(data);
 	
 	if (hayRed){
@@ -1165,4 +1190,35 @@ function inicializaPosicionamiento(){
     if (monitorizarRepartidor)
         watchId = navigator.geolocation.watchPosition(geoOK, geoError, { maximumAge: GEO_CACHE, timeout: GEO_TIMEOUT });
 	//posicionate();
+}
+
+/*************************************************************
+RUTAS
+*************************************************************/
+function calcRoute(origen, destino, directionsService, directionsDisplay, mode) {
+    var request = {
+        origin: origen,
+        destination: destino,
+        travelMode: google.maps.TravelMode[mode]
+    };
+    directionsService.route(request, function(response, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+            directionsDisplay.setDirections(response);
+        }
+    });    
+}
+
+function calcRutaConParadas(origen, destino, paradas, directionsService, directionsDisplay, mode){
+    var request = {
+            origin: origen,
+            destination: destino,
+            waypoints:paradas,
+            travelMode: google.maps.TravelMode[mode]
+        };
+        directionsService.route(request, function(response, status)
+            {
+            if (status == google.maps.DirectionsStatus.OK){
+                directionsDisplay.setDirections(response);
+            }
+        });    
 }

@@ -30,14 +30,15 @@
 		<link href="styles/css.css"			 rel="stylesheet" type="text/css"/>
 
 		<script type="text/javascript" src="scripts/jquery.js"></script>
+		<script type="text/javascript" src="scripts/jqueryui.js"></script>
 		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true&language=es"></script>
-		<!--<script type="text/javascript" src="scripts/jqueryui.js"></script>-->
+		<!---->
 		
 		<!--<script type="text/javascript" src="scripts/framework.plugins.js"></script>		
 		<script type="text/javascript" src="scripts/custom.js"></script>-->
 		
-		<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>
+		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
 		<!--
 		
 		<script type="text/javascript" src="scripts/md5.js"></script>-->
@@ -74,9 +75,9 @@
 				var bounds = new google.maps.LatLngBounds ();
 				bounds.extend(latlon);
 				if (posicion != undefined && posicion.lat != undefined){
-					bounds.extend(new google.maps.LatLng(posicion.lat, posicion.long)); 
+					bounds.extend(new google.maps.LatLng(posicion.lat, posicion.lng)); 
 					var usted = new google.maps.Marker({
-						position: new google.maps.LatLng(posicion.lat, posicion.long),
+						position: new google.maps.LatLng(posicion.lat, posicion.lng),
 						map: map,
 						title: 'Usted está aquí.',
 						icon:'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
@@ -116,27 +117,65 @@
 						posicion = coordenadas2JSON(pedido.cliente.coordenadas);
 						initializeMapa(posicion, pedido.cliente.direccion);						
 						$j('#entradilla').html('Direcci&oacute;n de entrega del pedido.');
-						pintaCliente(pedido.cliente);
+						pintaRecorridoPedido(pedido);
+						//pintaCliente(pedido.cliente);
 												
 					}else{
-						//se `pinta el negocio.
+						//se pinta el negocio.
 						negocio = getNegocioPorId(idPedido, idNegocio);
 						posicion = coordenadas2JSON(negocio.coordenadas);
 						initializeMapa(posicion, negocio.direccion);
-						//pintaRutaAlNegocio(negocio);
+						pintaRutaAlNegocio(negocio);
 						$j('#entradilla').html('Localización de ' + negocio.nombre);
-						pintaNegocio(negocio);
+						//pintaNegocio(negocio);
 					}
 				}
 			}
-			function pintaRutaAlNegocio(negocio){
-				posicion = getPosicion();
-				address = new google.maps.LatLng(posicion.lat,posicion.long);
-				coordenadas = coordenadas2JSON(negocio.coordenadas);
-				destino = new google.maps.LatLng(coordenadas.lat, coordenadas.long);
+			function pintaRecorridoPedido(pedido){
+				origen = getPosicion();
+				origen = new google.maps.LatLng(posicion.lat,posicion.lng);
+				negocios = [];
+				for(i=0;i<pedido.pedido.negocios.length;i++){
+					neg = pedido.pedido.negocios[i];
+					coor = coordenadas2JSON(neg.coordenadas);
+					negocios.push({location: new google.maps.LatLng(coor.lat, coor.lng),stopover:true});
+				}
+				destino = coordenadas2JSON(pedido.cliente.coordenadas);
+				destino = new google.maps.LatLng(destino.lat, destino.lng);
 				
+				directionsDisplay = new google.maps.DirectionsRenderer();
+				var mapOptions = {
+					mapTypeId: google.maps.MapTypeId.ROADMAP,
+					center: origen
+				}
+				map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);				
+				
+				directionsDisplay.setMap(map);
+				directionsDisplay.setPanel(document.getElementById('directions-panel'));
+				json = calcRoute(origen, destino, directionsService,directionsDisplay, "DRIVING");
+				calcRutaConParadas(origen,destino, negocios, directionsService,directionsDisplay, "DRIVING");
+			}
+			function pintaRutaAlNegocio(negocio){
+				origen = getPosicion();
+				origen = new google.maps.LatLng(posicion.lat,posicion.lng);
+				destino = coordenadas2JSON(negocio.coordenadas);
+				destino = new google.maps.LatLng(destino.lat, destino.lng);
+				
+				directionsDisplay = new google.maps.DirectionsRenderer();
+				var mapOptions = {
+					mapTypeId: google.maps.MapTypeId.ROADMAP,
+					center: origen
+				}
+				map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
+				
+				
+				directionsDisplay.setMap(map);
+				directionsDisplay.setPanel(document.getElementById('directions-panel'));
+				json = calcRoute(origen, destino, directionsService,directionsDisplay, "DRIVING");
 				
 			}
+			
+			
 			function pintaNegocios(pedido){
 				pedido = getPedidoPorId(idPedido);
 				negocios = pedido.pedido.negocios;
@@ -180,12 +219,14 @@
 			<a class="boton boton-atras boton-naranja" onClick="window.history.back();"><i class="fa fa-chevron-left"></i> ATRAS </a>			
 		</div>
 		<div class="mi-contenedor">
+			<div class="informacion" id="info">
+			</div>
 			<div id="entradilla" class="entradilla">
 			</div>
 			<div id="map-canvas" class="gmap">
 			</div>
-			<div class="informacion" id="info">
-			</div>
+			<div id="directions-panel"></div>
+			
 		</div>
 	</body>
 </html>
