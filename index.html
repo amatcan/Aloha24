@@ -44,25 +44,48 @@
 					"username":$j('#username').val(),
 					"password":$j('#password').val()
 				};
-				//.......................
+				//.......................827ccb0eea8a706c4c34a16891f84e7b
 				data = {'username':'pablo','password':'d99fa67519d0e3e5990b0238e9c56e19'};
 				url = URL_LOGIN+'?'+PAR_USERNAME+'=pablo&'+PAR_PASSWORD+'=d99fa67519d0e3e5990b0238e9c56e19';
-				url = URL_LOGIN;
+				
 				console.log(data);
 				//json = fget(url);
 				if (hayRed){
-					json = fpost(url, data);				
-					checkLogin(json);
+					pushLoader($j('loader'));
+					code = checkLogin('pablo','827ccb0eea8a706c4c34a16891f84e7b');
+					if (code == RETURN_CODE_LOGIN_ERROR){
+						html = '<div class="static-notification-red"><p class="center-text uppercase">Ha ocurrido un error durante el proceso de autenticación. Compruebe las credenciales y vuelva a intentarlo.</p>';
+						html += '<p class="center-text uppercase">Si el problema persiste, espere unos minutos antes de volver a intentarlo.</p></div>';
+						$j('#msg').html(html);
+						return false;
+					}
+					if (code == RETURN_CODE_OK_PEDIDO_EN_CURSO){
+						url = PAGE_DETALLE_PEDIDO+'?id='+pedidoActual.pedido.id;
+						window.location = url;
+					}
+					if (code == RETURN_CODE_OK_NO_PEDIDO_EN_CURSO){
+						url = PAGE_PEDIDOS;
+						window.location = url;
+					}
+					return true;
 				}
+				removeLoader($j('loader'));
 				return false;
 			}
-
+			function updateInterface(){
+				if (!hayRed){
+					html = '<div class="static-notification-red"><p class="center-text uppercase">En estos momentos no tiene conexi&oacute;n con la central. No podr&aacute; acceder a la aplicaci&oacute;n.</p></div>';
+					$j('#msg').html(html);
+					$j('#btnLogin').hide('fast');
+				}
+			}
 	        document.addEventListener("deviceready", onDeviceReady, false);
+			
 			function onDeviceReady() {
 				//Este interface no monitoriza al repartidor
 				monitorizarRepartidor = false;
-				checkConnection();
 				inicializacionEntorno();
+				updateInterface();
 		    }
 			document.addEventListener("backbutton", onBackKeyDown, false);
 			function onBackKeyDown() {
@@ -71,6 +94,7 @@
 		</script>  
 	</head>
 	<body onload="onDeviceReady();">
+		<div class="loader"></div>
 		<div class="all-elements">
 			<div id="perspective" class="perspective effect-airbnb"><!--this houses the entire page, and creates the effect-->
 				<div class="outer-nav">
@@ -90,6 +114,8 @@
 							</div>
 							<div class="container no-bottom">
 								<p>Introduce tus credenciales para acceder al sistema.</p>
+								<div id="msg">
+								</div>
 								<!--<form class="contactForm">-->
 									<fieldset>
 										<div class="formValidationError" id="contactNameFieldError">

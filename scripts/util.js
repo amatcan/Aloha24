@@ -11,6 +11,8 @@ jQuery.mobile.loadingMessage=false;
 /*************************************************************
 UTILERIA
 *************************************************************/
+
+
 /**
 Inicializa el entorno de ejecución de la aplicación. Sin la llamada a esta funcion en el OnDeviceReady se pueden obtener resultados
 incoherentes en la ejecución de la aplicación.
@@ -23,7 +25,7 @@ function inicializacionEntorno(){
 	$j(".ui-loader").attr('style','display:none');
 	check();
 	inicializaPosicionamiento();
-	setInterval(check, POOL_TIMEOUT);
+	setInterval(check, POOL_TIMEOUT);	
 }
 /**
 Chequea el estado de la conectividad de datos del dispositivo y actualiza la variable global hayRed para indicar esta situación.
@@ -368,6 +370,30 @@ function sendPeticion(url, data, f){
 	}
 }
 /**
+ * Muestra el loader
+ */
+function pushLoader(elto){ 
+    elto.show('fast'); 
+}
+/**
+ * Esconde el loader
+ */
+function removeLoader(elto){ 
+    $j(".loader").hide('fast'); 
+}
+
+/**
+ * Espera unos milesegundos antes de continuar
+ * @param millis
+ */
+function wait(millis)
+{
+    var date = new Date();
+    var curDate = null;    
+    do{curDate = new Date();}
+    while(curDate-date < millis);
+} 
+/**
 Implementa el proceso de login en la plataforma. En este caso:
 1: solicita validación de credenciales
 2: guarda las tareas del repartidos en el localStorage
@@ -376,7 +402,12 @@ Cuando se produce un acceso, y hay cambios almacenados de una sesión anterior, s
 con respecto a los cambios que se envían.
 Si se produce un error, ejecuta la función indicada----por implementar
 */
-function checkLogin(json){
+function checkLogin(usr, pwd){
+    if (!hayRed)
+        return RETURN_CODE_ERROR_SIN_RED;
+    url = URL_LOGIN;
+    data = {'username':usr,'password':pwd};
+    json = fpost(url, data);
     if (json.code == 0){
         removeTarea();
 		setToken(json.token);
@@ -408,17 +439,12 @@ function checkLogin(json){
 		pedidoActual = getPedidoActual();
 		//Para ir a un pedido directamente, además de existir su estado no puede ser ASIGNADO
 		if (pedidoActual != undefined && pedidoActual != null && pedidoActual.pedido.estado != PEDIDO_ESTADO_ASIGNADO){
-			url = PAGE_DETALLE_PEDIDO+'?id='+pedidoActual.pedido.id;
-			window.location = url;
-			//jQuery.mobile.changePage(url);
+			return RETURN_CODE_OK_PEDIDO_EN_CURSO;
 		}
 		else
-			window.location = PAGE_PEDIDOS;
+		    return RETURN_CODE_OK_NO_PEDIDO_EN_CURSO;			
     }
-    else{
-		html = '<div class="alert alert-warning" role="alert">Credenciales incorrectas.</div>';
-        $j('#msg').html(html);
-	}
+    return RETURN_CODE_LOGIN_ERROR;
 }
 
 /**
@@ -634,13 +660,11 @@ PEDIDOS
 El pedido que tengan la clase primero-disponible, presenta una confirmación para iniciarlo. Si no se acepta, solo
 se ven los datos.
 */
-function confirmarPuestaPedidoEnCurso(idPedido){
-	if (confirm("Seguro que desea comenzar con este pedido.")){
-		code = setPedidoEnCurso(idPedido);
-		if (code == RETURN_CODE_OK || code == RETURN_CODE_OK_SIN_RED){
-			return true;
-		}						
-	}
+function ponerPedidoEnCurso(idPedido){
+	code = setPedidoEnCurso(idPedido);
+	if (code == RETURN_CODE_OK || code == RETURN_CODE_OK_SIN_RED){
+		return true;
+	}						
 	return false;
 }
 /**

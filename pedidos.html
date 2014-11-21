@@ -63,6 +63,17 @@
 					alert("No tiene pedidos asignados.");
 				}
 			}
+			function confirmarPuestaPedidoEnCurso(id){
+				if (confirm("Seguro que desea comenzar con este pedido.")){
+					pushLoader($j('.loader'));			
+					code = ponerPedidoEnCurso(id);
+					if (code == true)
+						window.location = PAGE_DETALLE_PEDIDO+'?'+ID+'='+pedido.pedido.id;
+					removeLoader($j('.loader'));
+				}
+				
+				return false;
+			}
 			/**
 			Pinta la lista de los pedidos asignados en la tarea. Si no hay pedido en curso, solo podrá coger el primer pedido que no esté entregado para iniciarlo y el resto solo podrá consultarlo.
 			@param pedidos Pedidos a pintar.
@@ -120,7 +131,8 @@
 						estilo = 'pedido-default';
 				}
 				
-				ahtml = '<a rel="external" '+(funcionalidad!=null?funcionalidad:'')+' href="'+PAGE_DETALLE_PEDIDO+'?'+ID+'='+pedido.pedido.id+'" ';
+				//href="'+PAGE_DETALLE_PEDIDO+'?'+ID+'='+pedido.pedido.id+'" 
+				ahtml = '<a rel="external" '+(funcionalidad!=null?funcionalidad:'');
 				
 				html = '<ul class="pedido '+estilo+'" id="PED_'+pedido.pedido.id+'">';
 				//html += '<li class="orden">'+ahtml+' id="ORDEN_'+pedido.pedido.id+'">'+orden+'</a></li>';
@@ -150,6 +162,7 @@
 		</script>  
 	</head>
 	<body onload="onDeviceReady();">
+		<div class="loader"></div>
 		<div class="all-elements">
 			<div id="perspective" class="perspective effect-airbnb"><!--this houses the entire page, and creates the effect-->
 				<div class="header">
