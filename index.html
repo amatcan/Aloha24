@@ -31,7 +31,7 @@
 		<script type="text/javascript" src="scripts/jquery.mobile-1.4.3.min.js"></script>
 		<script type="text/javascript" src="scripts/framework.plugins.js"></script>
 		<script type="text/javascript" src="scripts/custom.js"></script>
-		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>
 		<script type="text/javascript" src="scripts/constantes.js"></script>
 		<script type="text/javascript" src="scripts/util.js"></script>
 		<script type="text/javascript" src="scripts/md5.js"></script>
@@ -51,12 +51,13 @@
 				console.log(data);
 				//json = fget(url);
 				if (hayRed){
-					pushLoader($j('loader'));
+					pushLoader();
 					code = checkLogin('pablo','827ccb0eea8a706c4c34a16891f84e7b');
 					if (code == RETURN_CODE_LOGIN_ERROR){
 						html = '<div class="static-notification-red"><p class="center-text uppercase">Ha ocurrido un error durante el proceso de autenticación. Compruebe las credenciales y vuelva a intentarlo.</p>';
 						html += '<p class="center-text uppercase">Si el problema persiste, espere unos minutos antes de volver a intentarlo.</p></div>';
 						$j('#msg').html(html);
+						removeLoader();
 						return false;
 					}
 					if (code == RETURN_CODE_OK_PEDIDO_EN_CURSO){
@@ -69,7 +70,6 @@
 					}
 					return true;
 				}
-				removeLoader($j('loader'));
 				return false;
 			}
 			function updateInterface(){

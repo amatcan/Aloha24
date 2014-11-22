@@ -372,14 +372,14 @@ function sendPeticion(url, data, f){
 /**
  * Muestra el loader
  */
-function pushLoader(elto){ 
-    elto.show('fast'); 
+function pushLoader(){ 
+    $j('.loader').show('fast');
 }
 /**
  * Esconde el loader
  */
-function removeLoader(elto){ 
-    $j(".loader").hide('fast'); 
+function removeLoader(){ 
+    $j('.loader').hide('fast');
 }
 
 /**
@@ -890,6 +890,8 @@ function actualizaNotificacionGeo(){
 }
 function actualizaNumeroPedidos(){
     tarea = getTarea();
+    if (tarea == undefined)
+        return;
 	//mete numero de pedidos
 	$j('#MU-PEDIDOS').html('<span class="badge notificacion">'+tarea.pedidos.length+'</span>');
 }
