@@ -44,9 +44,11 @@ function checkConnection() {
 		states[Connection.CELL]     = 'Cell generic connection';
 		states[Connection.NONE]     = 'No network connection';
 		hayRed = networkState != Connection.NONE;
+
 		window.localStorage.setItem(HAY_RED, hayRed);
 		return hayRed;
 	}
+	
 	if (navigator.onLine != undefined && navigator.onLine == true)
 	    hayRed = true;
 	else
@@ -728,6 +730,7 @@ RETURN_CODE_OK_SIN_RED todo fue bien y no hay red
 */
 function peticionCambioEstadoPedido(url, idPed, estado, idNeg){
 	if (hayRed){
+	    pushLoader();
 		token = getToken();
 		//falta verificar si hay pars anteriores
 		//url += '&'+PAR_TOKEN+'='+token;
@@ -740,6 +743,7 @@ function peticionCambioEstadoPedido(url, idPed, estado, idNeg){
 		if (json.code != undefined){
 			if (json.code == -1){
 				muestraMensaje("Se ha producido un error en el servidor.");
+				removeLoader();
 				return RETURN_CODE_ERROR;
 			}else{
 				if (json.code == RETURN_CODE_OK){
@@ -748,19 +752,23 @@ function peticionCambioEstadoPedido(url, idPed, estado, idNeg){
 						pos = getPosicionPedidoPorId(idPed,tarea);
 						if (pos == -1){
 							muestraMensaje("Error. Pedido no localizado.");
+							removeLoader();
 							return RETURN_CODE_ERROR;
 						}
 						tarea.pedidos[pos].pedido.estado = estado;
 						//Marca el pedido
 						setTarea(tarea);
+						removeLoader();
 						return RETURN_CODE_OK;
 					}else{
-						muestraMensaje("Error interno de la aplicación: Tarea no disponible.");
+					    removeLoader();
+						muestraMensaje("Error interno de la aplicación: Tarea no disponible.");						
 						return RETURN_CODE_ERROR
 					}
 				}else{
 					if (json.code == RETURN_CODE_UPDATE){
 					    tarea = parseaTarea(json);
+					    removeLoader();
 						muestraMensaje("Su tarea ha sido actualizada por la central. Por favor, compruebe la.");
 						setTarea(tarea);
 						return RETURN_CODE_UPDATE;
@@ -970,8 +978,8 @@ function getPosicionNegocioPorId(idPedido, idNegocio){
 Actualiza el estado de un negocio que aparece en la ruta de un pedido.
 */
 function setEstadoNegocio(idPedido, idNegocio, estado, f, fe, token){
-	console.log("Actualizando negocio..." + idPedido + ","+idNegocio+","+estado);
 	if (hayRed){    
+	    pushLoader();
         pos = getPosicionPedidoPorId(idPedido, tarea);
         nNegocios = tarea.pedidos[pos].pedido.negocios.length;
         posNegocio = -1
@@ -1014,6 +1022,7 @@ function setEstadoNegocio(idPedido, idNegocio, estado, f, fe, token){
 		if (json.code != undefined){
 			if (json.code == -1){
 				muestraMensaje("Se ha producido un error en el servidor.");
+				removeLoader();
 				return false;
 			}else{
 				if (json.code == 0){
@@ -1029,6 +1038,7 @@ function setEstadoNegocio(idPedido, idNegocio, estado, f, fe, token){
 				}
 			}
 		}
+		removeLoader();
 	}else{
 	    tarea = getTarea();                
         if (tarea == undefined)

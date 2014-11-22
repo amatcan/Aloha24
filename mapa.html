@@ -38,7 +38,7 @@
 		<!--<script type="text/javascript" src="scripts/framework.plugins.js"></script>		
 		<script type="text/javascript" src="scripts/custom.js"></script>-->
 		
-		<!--<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>-->
+		<script type="text/javascript" src="scripts/cordova-2.9.0.js"></script>
 		<!--
 		
 		<script type="text/javascript" src="scripts/md5.js"></script>-->
@@ -116,9 +116,9 @@
 						pedido = getPedidoPorId(idPedido);
 						posicion = coordenadas2JSON(pedido.cliente.coordenadas);
 						initializeMapa(posicion, pedido.cliente.direccion);						
-						$j('#entradilla').html('Direcci&oacute;n de entrega del pedido.');
+						$j('#entradilla').html('<p>Informaci&oacute;n de la ruta aconsejada para realizar entrega del pedido.</p>');
 						pintaRecorridoPedido(pedido);
-						//pintaCliente(pedido.cliente);
+						pintaCliente(pedido.cliente);
 												
 					}else{
 						//se pinta el negocio.
@@ -126,8 +126,8 @@
 						posicion = coordenadas2JSON(negocio.coordenadas);
 						initializeMapa(posicion, negocio.direccion);
 						pintaRutaAlNegocio(negocio);
-						$j('#entradilla').html('Localización de ' + negocio.nombre);
-						//pintaNegocio(negocio);
+						$j('#entradilla').html('<p>Localización de ' + negocio.nombre+'</p>');
+						pintaNegocio(negocio);
 					}
 				}
 			}
@@ -198,18 +198,15 @@
 			/**
 			Actualiza el interface de usuario con la información de la tarea asignada.
 			*/
-			function updateInterface(){
-				
+			function updateInterface(){				
 				pintaMapa();
 			}
-
-			
+		
 			
 			//document.addEventListener("deviceready", onDeviceReady, false);
 			function onDeviceReady() {
 				inicializacionEntorno();
 				updateInterface();
-				
 		    } 
 		</script>  
 
@@ -219,13 +216,17 @@
 			<a class="boton boton-atras boton-naranja" onClick="window.history.back();"><i class="fa fa-chevron-left"></i> ATRAS </a>			
 		</div>
 		<div class="mi-contenedor">
-			<div class="informacion" id="info">
-			</div>
 			<div id="entradilla" class="entradilla">
+			</div>
+			<h3>Dirección de entrega</h3>
+			<div class="informacion" id="info">
 			</div>
 			<div id="map-canvas" class="gmap">
 			</div>
-			<div id="directions-panel"></div>
+			<div id="informacion-ruta">
+				<h3>Como llegar</h3>
+				<div id="directions-panel"></div>
+			</div>
 			
 		</div>
 	</body>
